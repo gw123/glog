@@ -59,7 +59,7 @@ func Info(format string, other ...interface{}) {
 }
 
 func Debug(format string, other ...interface{}) {
-	log.Printf(format, other)
+	log.Printf(format, other...)
 	//str := fmt.Sprintf(format, other)
 	//logColorful("[D] "+str, ColorBlack, ColorAmaranth, Style1)
 }
