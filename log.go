@@ -27,9 +27,7 @@ const (
 	Style8 = 8
 )
 
-func SetOutput() {
 
-}
 
 func Dump(input interface{}) {
 	out1, err := json.MarshalIndent(input, "", " ")
@@ -41,27 +39,22 @@ func Dump(input interface{}) {
 }
 
 func Error(format string, other ...interface{}) {
-	//log.Printf("%s", out)
 	str := fmt.Sprintf(format, other...)
 	logColorful("[E] "+str, ColorBlack, ColorRed, Style1)
 }
 
 func Warn(format string, other ...interface{}) {
-	//log.Printf("%s", out)
 	str := fmt.Sprintf(format, other...)
 	logColorful("[W] "+str, ColorBlack, ColorYello, Style1)
 }
 
 func Info(format string, other ...interface{}) {
-	//log.Printf("%s", out)
 	str := fmt.Sprintf(format, other...)
 	logColorful("[I] "+str, ColorBlack, ColorUltramarine, Style1)
 }
 
 func Debug(format string, other ...interface{}) {
 	log.Printf(format, other...)
-	//str := fmt.Sprintf(format, other)
-	//logColorful("[D] "+str, ColorBlack, ColorAmaranth, Style1)
 }
 
 func Output(out string) {
