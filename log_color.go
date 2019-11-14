@@ -27,13 +27,17 @@ const (
 	Style8 = 8
 )
 
-func Dump(input interface{}) {
+func Dump(input interface{}, label ...string) {
 	out1, err := json.MarshalIndent(input, "", " ")
 	if err != nil {
 		fmt.Println("Dump", err.Error())
 		return
 	}
-	logColorful(string(out1), ColorUltramarine, ColorUltramarine, 1)
+	if len(label) >= 1 {
+		logColorful("label:"+label[0]+string(out1), ColorUltramarine, ColorUltramarine, 1)
+	} else {
+		logColorful(string(out1), ColorUltramarine, ColorUltramarine, 1)
+	}
 }
 
 func Error(format string, other ...interface{}) {
