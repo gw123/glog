@@ -5,20 +5,30 @@ profile.go 是用来定时记录一个profile文件
 pprof文件的默认位置在/tmp/pprof/exeName/day_hour_minute/mem.pprof
 修改配置方式
 
-```go
-    SetProfile(ProfileMode("cpu"), ProfilePath("./"), ProfilePeriod(time.minute*10))
-```
-##### mode支持的profile类型
+
+### 修改profile类型
+    SetProfile(ProfileMode(mode))
+    mode支持的profile类型
     PModeCpu = "cpu"    
 	PModeMem = "mem"   
 	PModeMutex = "mutex" 
 	PModeThread = "thread"
 	PModeTrace = "trace"
 	
+## 修改pprof文件生成路径
+	SetProfile(ProfilePath("./"))
+	
+## 修改单个pprof采集时长
+	SetProfile(ProfilePeriod(time.minute*10))
+	
+## 多个配置一起修改
+    SetProfile(ProfileMode("cpu"), ProfilePath("./"), ProfilePeriod(time.minute*10))
+
+	
 #### 开始记录
-StartProfile()
+    StartProfile()
 
 ##### 停止记录
-StopProfile()
+    StopProfile()
 
 # ctxlog.go 是利用context做日志的上下文记录
