@@ -5,6 +5,8 @@ profile.go 是用来定时记录一个profile文件
 pprof文件的默认位置在/tmp/pprof/exeName/day_hour_minute/mem.pprof
 修改配置方式
 
+tip:go tool pprof 和 pprof 工具使用请查看:
+http://www.xytschool.com/chapter/454.html
 
 ### 修改profile类型
     SetProfile(ProfileMode(mode))
