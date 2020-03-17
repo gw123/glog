@@ -1,3 +1,7 @@
+# ctxlog.go 是利用context做日志的上下文记录
+
+
+# 记录日志
 # profile.go使用方式
 profile.go 是用来定时记录一个profile文件
 默认的时间间隔是一小时 
@@ -19,18 +23,11 @@ http://www.xytschool.com/chapter/454.html
 	
 ## 修改pprof文件生成路径
 	SetProfile(ProfilePath("./"))
-	
 ## 修改单个pprof采集时长
 	SetProfile(ProfilePeriod(time.minute*10))
-	
 ## 多个配置一起修改
     SetProfile(ProfileMode("cpu"), ProfilePath("./"), ProfilePeriod(time.minute*10))
-
-	
 #### 开始记录
     StartProfile()
-
 ##### 停止记录
     StopProfile()
-
-# ctxlog.go 是利用context做日志的上下文记录

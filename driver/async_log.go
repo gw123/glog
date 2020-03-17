@@ -1,4 +1,4 @@
-package glog
+package driver
 
 import (
 	"bytes"
@@ -6,7 +6,6 @@ import (
 	"io"
 	"time"
 )
-
 
 var dataBuffer *bytes.Buffer
 
