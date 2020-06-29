@@ -46,6 +46,9 @@ func findCaller(skip int) string {
 		if !strings.HasPrefix(file, "logrus") {
 			break
 		}
+		if !strings.HasPrefix(file, "glog") {
+			break
+		}
 	}
 	return fmt.Sprintf("%s:%d", file, line)
 }
