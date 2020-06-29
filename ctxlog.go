@@ -21,6 +21,7 @@ type Record struct {
 }
 
 const RequestId  = "RequestId"
+const TimeFormat = "2006-01-02 15:04:05"
 
 var (
 	ctxLoggerKey    = &ctxLoggerMarker{}
@@ -40,7 +41,7 @@ func DefaultLogger() *logrus.Logger {
 		defaultLogger = logrus.New()
 	}
 	defaultLogger.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat:  "2006-01-02 15:04:05",
+		TimestampFormat:  TimeFormat,
 		DisableTimestamp: false,
 		DataKey:          "",
 		FieldMap:         nil,
@@ -74,6 +75,7 @@ func AddFields(ctx context.Context, fields logrus.Fields) {
 		l.fields[k] = v
 	}
 }
+
 //添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
 func AddField(ctx context.Context, key, val string) {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
@@ -110,7 +112,7 @@ func ExtractEntry(ctx context.Context) *logrus.Entry {
 	}
 
 	requestId := ExtractRequestId(ctx)
-	if requestId != ""{
+	if requestId != "" {
 		fields[RequestId] = requestId
 	}
 	return l.logger.WithFields(fields)
