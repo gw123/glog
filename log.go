@@ -29,8 +29,8 @@ func GetLogger() *logrus.Logger {
 	return logger
 }
 
-func SetDefaultLogger(logger2 *logrus.Logger) {
-	logger = logger2
+func SetDefaultLogger(l *logrus.Logger) {
+	logger = l
 }
 
 func SetDefaultJsonLogger() {

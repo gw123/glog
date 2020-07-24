@@ -3,14 +3,17 @@ package glog
 import (
 	"context"
 	"github.com/sirupsen/logrus"
+	"sync"
 )
 
 type ctxLoggerMarker struct{}
 type ctxRequestIdMarker struct{}
+type ctxUserIdMarker struct{}
 
 type ctxLogger struct {
 	logger *logrus.Entry
 	fields logrus.Fields
+	mutex  sync.Mutex
 }
 
 type Record struct {
@@ -20,12 +23,14 @@ type Record struct {
 	Place     string `json:"place"`
 }
 
-const RequestId  = "RequestId"
+const RequestId = "RequestId"
+const UserId = "UserId"
 const TimeFormat = "2006-01-02 15:04:05"
 
 var (
 	ctxLoggerKey    = &ctxLoggerMarker{}
 	ctxRequestIdKey = &ctxRequestIdMarker{}
+	ctxUserIdKey    = &ctxUserIdMarker{}
 
 	defaultLogger *logrus.Logger
 	isDebug       = false
@@ -53,16 +58,6 @@ func DefaultLogger() *logrus.Logger {
 
 func NewDefaultEntry() *logrus.Entry {
 	return logrus.NewEntry(DefaultLogger())
-}
-
-// 添加logrus.Entry到context, 这个操作添加的logrus.Entry在后面AddFields和Extract都会使用到
-func ToContext(ctx context.Context, entry *logrus.Entry) context.Context {
-	l := &ctxLogger{
-		logger: entry,
-		fields: logrus.Fields{},
-	}
-
-	return context.WithValue(ctx, ctxLoggerKey, l)
 }
 
 //添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
@@ -99,12 +94,40 @@ func ExtractRequestId(ctx context.Context) string {
 	return l
 }
 
-//导出ctx_logrus日志库
+//添加一个userId
+func AddUserId(ctx context.Context, userId int64) context.Context {
+	return context.WithValue(ctx, ctxUserIdKey, userId)
+}
+
+//export userId
+func ExtractUserId(ctx context.Context) int64 {
+	l, ok := ctx.Value(ctxUserIdKey).(int64)
+	if !ok {
+		return 0
+	}
+	return l
+}
+
+// 添加logrus.Entry到context, 这个操作添加的logrus.Entry在后面AddFields和Extract都会使用到
+func ToContext(ctx context.Context, entry *logrus.Entry) context.Context {
+	l := &ctxLogger{
+		logger: entry,
+		fields: logrus.Fields{},
+		mutex:  sync.Mutex{},
+	}
+
+	return context.WithValue(ctx, ctxLoggerKey, l)
+}
+
+//extract ctx_logrus logrus.Entry
 func ExtractEntry(ctx context.Context) *logrus.Entry {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
 		return logrus.NewEntry(logrus.New())
 	}
+
+	l.mutex.Lock()
+	defer l.mutex.Unlock()
 
 	fields := logrus.Fields{}
 	for k, v := range l.fields {
@@ -112,8 +135,9 @@ func ExtractEntry(ctx context.Context) *logrus.Entry {
 	}
 
 	requestId := ExtractRequestId(ctx)
-	if requestId != "" {
-		fields[RequestId] = requestId
-	}
+	fields[RequestId] = requestId
+
+	userId := ExtractUserId(ctx)
+	fields[UserId] = userId
 	return l.logger.WithFields(fields)
 }
