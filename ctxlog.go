@@ -84,8 +84,8 @@ func AddField(ctx context.Context, key, val string) {
 }
 
 // 添加一个追踪规矩id 用来聚合同一次请求, 注意要用返回的contxt 替换传入的ctx
-func AddRequestId(ctx context.Context, requestId string) context.Context {
-	return context.WithValue(ctx, ctxRequestIdKey, requestId)
+func AddRequestId(ctx context.Context, requestID string) context.Context {
+	return context.WithValue(ctx, ctxRequestIdKey, requestID)
 }
 
 //导出requestId
@@ -98,8 +98,8 @@ func ExtractRequestId(ctx context.Context) string {
 }
 
 //add userId to ctx
-func AddUserId(ctx context.Context, userId int64) context.Context {
-	return context.WithValue(ctx, ctxUserIdKey, userId)
+func AddUserId(ctx context.Context, userID int64) context.Context {
+	return context.WithValue(ctx, ctxUserIdKey, userID)
 }
 
 //export userId
@@ -112,8 +112,8 @@ func ExtractUserId(ctx context.Context) int64 {
 }
 
 //add comId to ctx
-func AddComId(ctx context.Context, userId int64) context.Context {
-	return context.WithValue(ctx, ctxComIdKey, userId)
+func AddComId(ctx context.Context, comID int64) context.Context {
+	return context.WithValue(ctx, ctxComIdKey, comID)
 }
 
 //export comId
