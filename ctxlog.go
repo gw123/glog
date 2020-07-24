@@ -156,5 +156,8 @@ func ExtractEntry(ctx context.Context) *logrus.Entry {
 
 	userID := ExtractUserID(ctx)
 	fields[UserID] = userID
+
+	comID := ExtractComID(ctx)
+	fields[ComID] = comID
 	return l.logger.WithFields(fields)
 }
