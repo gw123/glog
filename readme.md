@@ -33,15 +33,15 @@ ctx = ToContext(ctx, entry)
 AddField(ctx, "app_name", "web")
 //4. 然后将这个根context传到应用框架中
 
-//5. 在中间件里调用AddRequestId(ctx, requestId) 记录一次请求的requestId, 
-//后面在调用ExtractEntry()输出日志时候会把ctx里面记录的requestId输出
-ctx = AddRequestId(ctx, "10000001")
+//5. 在中间件里调用AddRequestID(ctx, requestID) 记录一次请求的requestID, 
+//后面在调用ExtractEntry()输出日志时候会把ctx里面记录的requestID输出
+ctx = AddRequestID(ctx, "10000001")
 
 //6. 在action 或者service 等地方记录日志记录日志
 ExtractEntry(ctx).WithField("ip", "10.0.0.1").Info("TestContent")
 
 //输出结果
-//{"RequestId":"10000001","app_name":"web","ip":"10.0.0.1","level":"info","msg":"TestContent","time":"2020-03-17 20:34:14"}
+//{"RequestID":"10000001","app_name":"web","ip":"10.0.0.1","level":"info","msg":"TestContent","time":"2020-03-17 20:34:14"}
 ```
 
 # 记录日志

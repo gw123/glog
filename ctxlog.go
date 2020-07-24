@@ -7,9 +7,9 @@ import (
 )
 
 type ctxLoggerMarker struct{}
-type ctxRequestIdMarker struct{}
-type ctxUserIdMarker struct{}
-type ctxComIdMarker struct{}
+type ctxRequestIDMarker struct{}
+type ctxUserIDMarker struct{}
+type ctxComIDMarker struct{}
 
 type ctxLogger struct {
 	logger *logrus.Entry
@@ -18,22 +18,22 @@ type ctxLogger struct {
 }
 
 type Record struct {
-	TraceId   int64  `json:"trace_id"`
+	TraceID   int64  `json:"trace_id"`
 	CreatedAt int64  `json:"uint_64"`
 	Point     string `json:"point"`
 	Place     string `json:"place"`
 }
 
-const RequestId = "request_id"
-const UserId = "user_id"
-const ComId = "com_id"
+const RequestID = "request_id"
+const UserID = "user_id"
+const ComID = "com_id"
 const TimeFormat = "2006-01-02 15:04:05"
 
 var (
 	ctxLoggerKey    = &ctxLoggerMarker{}
-	ctxRequestIdKey = &ctxRequestIdMarker{}
-	ctxUserIdKey    = &ctxUserIdMarker{}
-	ctxComIdKey     = &ctxComIdMarker{}
+	ctxRequestIDKey = &ctxRequestIDMarker{}
+	ctxUserIDKey    = &ctxUserIDMarker{}
+	ctxComIDKey     = &ctxComIDMarker{}
 
 	defaultLogger *logrus.Logger
 	isDebug       = false
@@ -84,41 +84,41 @@ func AddField(ctx context.Context, key, val string) {
 }
 
 // 添加一个追踪规矩id 用来聚合同一次请求, 注意要用返回的contxt 替换传入的ctx
-func AddRequestId(ctx context.Context, requestID string) context.Context {
-	return context.WithValue(ctx, ctxRequestIdKey, requestID)
+func AddRequestID(ctx context.Context, requestID string) context.Context {
+	return context.WithValue(ctx, ctxRequestIDKey, requestID)
 }
 
-//导出requestId
-func ExtractRequestId(ctx context.Context) string {
-	l, ok := ctx.Value(ctxRequestIdKey).(string)
+//导出requestID
+func ExtractRequestID(ctx context.Context) string {
+	l, ok := ctx.Value(ctxRequestIDKey).(string)
 	if !ok {
 		return ""
 	}
 	return l
 }
 
-//add userId to ctx
-func AddUserId(ctx context.Context, userID int64) context.Context {
-	return context.WithValue(ctx, ctxUserIdKey, userID)
+//add userID to ctx
+func AddUserID(ctx context.Context, userID int64) context.Context {
+	return context.WithValue(ctx, ctxUserIDKey, userID)
 }
 
-//export userId
-func ExtractUserId(ctx context.Context) int64 {
-	l, ok := ctx.Value(ctxUserIdKey).(int64)
+//export userID
+func ExtractUserID(ctx context.Context) int64 {
+	l, ok := ctx.Value(ctxUserIDKey).(int64)
 	if !ok {
 		return 0
 	}
 	return l
 }
 
-//add comId to ctx
-func AddComId(ctx context.Context, comID int64) context.Context {
-	return context.WithValue(ctx, ctxComIdKey, comID)
+//add comID to ctx
+func AddComID(ctx context.Context, comID int64) context.Context {
+	return context.WithValue(ctx, ctxComIDKey, comID)
 }
 
-//export comId
-func ExtractComId(ctx context.Context) int64 {
-	l, ok := ctx.Value(ctxComIdKey).(int64)
+//export comID
+func ExtractComID(ctx context.Context) int64 {
+	l, ok := ctx.Value(ctxComIDKey).(int64)
 	if !ok {
 		return 0
 	}
@@ -151,10 +151,10 @@ func ExtractEntry(ctx context.Context) *logrus.Entry {
 		fields[k] = v
 	}
 
-	requestId := ExtractRequestId(ctx)
-	fields[RequestId] = requestId
+	requestID := ExtractRequestID(ctx)
+	fields[RequestID] = requestID
 
-	userId := ExtractUserId(ctx)
-	fields[UserId] = userId
+	userID := ExtractUserID(ctx)
+	fields[UserID] = userID
 	return l.logger.WithFields(fields)
 }
