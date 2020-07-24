@@ -9,6 +9,7 @@ import (
 type ctxLoggerMarker struct{}
 type ctxRequestIdMarker struct{}
 type ctxUserIdMarker struct{}
+type ctxComIdMarker struct{}
 
 type ctxLogger struct {
 	logger *logrus.Entry
@@ -23,14 +24,16 @@ type Record struct {
 	Place     string `json:"place"`
 }
 
-const RequestId = "RequestId"
-const UserId = "UserId"
+const RequestId = "request_id"
+const UserId = "user_id"
+const ComId = "com_id"
 const TimeFormat = "2006-01-02 15:04:05"
 
 var (
 	ctxLoggerKey    = &ctxLoggerMarker{}
 	ctxRequestIdKey = &ctxRequestIdMarker{}
 	ctxUserIdKey    = &ctxUserIdMarker{}
+	ctxComIdKey     = &ctxComIdMarker{}
 
 	defaultLogger *logrus.Logger
 	isDebug       = false
@@ -94,7 +97,7 @@ func ExtractRequestId(ctx context.Context) string {
 	return l
 }
 
-//添加一个userId
+//add userId to ctx
 func AddUserId(ctx context.Context, userId int64) context.Context {
 	return context.WithValue(ctx, ctxUserIdKey, userId)
 }
@@ -102,6 +105,20 @@ func AddUserId(ctx context.Context, userId int64) context.Context {
 //export userId
 func ExtractUserId(ctx context.Context) int64 {
 	l, ok := ctx.Value(ctxUserIdKey).(int64)
+	if !ok {
+		return 0
+	}
+	return l
+}
+
+//add comId to ctx
+func AddComId(ctx context.Context, userId int64) context.Context {
+	return context.WithValue(ctx, ctxComIdKey, userId)
+}
+
+//export comId
+func ExtractComId(ctx context.Context) int64 {
+	l, ok := ctx.Value(ctxComIdKey).(int64)
 	if !ok {
 		return 0
 	}
