@@ -3,81 +3,93 @@ package glog
 import (
 	"github.com/gw123/glog/hook"
 	"github.com/sirupsen/logrus"
+	"runtime"
 )
 
-var logger *logrus.Logger
+var defaultLogger *logrus.Logger
+var isDebug = false
 
-func init() {
-	formatter := logrus.TextFormatter{
-		ForceColors:               false,
-		DisableColors:             false,
-		EnvironmentOverrideColors: false,
-		DisableTimestamp:          false,
-		FullTimestamp:             true,
-		TimestampFormat:           "2006-01-02 15:04",
-		DisableSorting:            false,
-		SortingFunc:               nil,
-		DisableLevelTruncation:    false,
-		QuoteEmptyFields:          false,
-		FieldMap:                  nil,
-		CallerPrettyfier:          nil,
+func SetDebug(flag bool) {
+	isDebug = flag
+}
+
+// 为了方便创建一个默认的Logger
+func DefaultLogger() *logrus.Logger {
+	if defaultLogger == nil {
+		defaultLogger = TextLogger()
 	}
-	SetDefaultLoggerFormatter(&formatter)
+	return defaultLogger
 }
 
-func GetLogger() *logrus.Logger {
-	return logger
-}
-
-func SetDefaultLogger(l *logrus.Logger) {
-	logger = l
-}
-
-func SetDefaultJsonLogger() {
-	formatter := logrus.JSONFormatter{
+func JsonLogger() *logrus.Logger {
+	jsonLogger := logrus.New()
+	jsonLogger.SetFormatter(&logrus.JSONFormatter{
+		TimestampFormat:  TimeFormat,
 		DisableTimestamp: false,
-		TimestampFormat:  "2006-01-02 15:04",
-		FieldMap:         nil,
-		CallerPrettyfier: nil,
-	}
-	SetDefaultLoggerFormatter(&formatter)
+		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			return frame.Function, frame.File
+		},
+		PrettyPrint: isDebug,
+	})
+	return jsonLogger
+}
+
+func JsonEntry() *logrus.Entry {
+	return logrus.NewEntry(DefaultLogger())
+}
+
+// 为了方便创建一个默认的Logger
+func TextLogger() *logrus.Logger {
+	textLogger := logrus.New()
+	textLogger.SetFormatter(&logrus.TextFormatter{
+		TimestampFormat:  TimeFormat,
+		DisableTimestamp: false,
+		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			return frame.Function, frame.File
+		},
+	})
+	return textLogger
+}
+
+func TextEntry() *logrus.Entry {
+	return logrus.NewEntry(TextLogger())
 }
 
 func SetDefaultLoggerFormatter(formatter logrus.Formatter) {
 	newLogger := logrus.New()
 	newLogger.SetFormatter(formatter)
 	newLogger.AddHook(&hook.LogHook{Field: "caller"})
-	logger = newLogger
+	defaultLogger = newLogger
 }
 
 func Error(format string) {
-	logger.Error(format)
+	defaultLogger.Error(format)
 }
 
 func Errorf(format string, other ...interface{}) {
-	logger.Errorf(format, other...)
+	defaultLogger.Errorf(format, other...)
 }
 
 func Warn(format string) {
-	logger.Warn(format)
+	defaultLogger.Warn(format)
 }
 
 func Warnf(format string, other ...interface{}) {
-	logger.Warnf(format, other...)
+	defaultLogger.Warnf(format, other...)
 }
 
 func Info(format string) {
-	logger.Info(format)
+	defaultLogger.Info(format)
 }
 
 func Infof(format string, other ...interface{}) {
-	logger.Infof(format, other...)
+	defaultLogger.Infof(format, other...)
 }
 
 func Debug(format string) {
-	logger.Debug(format)
+	defaultLogger.Debug(format)
 }
 
 func Debugf(format string, other ...interface{}) {
-	logger.Debugf(format, other...)
+	defaultLogger.Debugf(format, other...)
 }

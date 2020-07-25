@@ -34,34 +34,7 @@ var (
 	ctxRequestIDKey = &ctxRequestIDMarker{}
 	ctxUserIDKey    = &ctxUserIDMarker{}
 	ctxComIDKey     = &ctxComIDMarker{}
-
-	defaultLogger *logrus.Logger
-	isDebug       = false
 )
-
-func SetDebug(flag bool) {
-	isDebug = flag
-}
-
-// 为了方便创建一个默认的Logger
-func DefaultLogger() *logrus.Logger {
-	if defaultLogger == nil {
-		defaultLogger = logrus.New()
-	}
-	defaultLogger.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat:  TimeFormat,
-		DisableTimestamp: false,
-		DataKey:          "",
-		FieldMap:         nil,
-		CallerPrettyfier: nil,
-		PrettyPrint:      isDebug,
-	})
-	return defaultLogger
-}
-
-func NewDefaultEntry() *logrus.Entry {
-	return logrus.NewEntry(DefaultLogger())
-}
 
 //添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
 func AddFields(ctx context.Context, fields logrus.Fields) {
@@ -88,7 +61,7 @@ func AddRequestID(ctx context.Context, requestID string) context.Context {
 	return context.WithValue(ctx, ctxRequestIDKey, requestID)
 }
 
-//导出requestID
+//export requestID
 func ExtractRequestID(ctx context.Context) string {
 	l, ok := ctx.Value(ctxRequestIDKey).(string)
 	if !ok {
