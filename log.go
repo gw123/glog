@@ -34,6 +34,17 @@ func JsonLogger() *logrus.Logger {
 	return jsonLogger
 }
 
+func GetDefaultJsonLoggerFormatter() logrus.Formatter {
+	return &logrus.JSONFormatter{
+		TimestampFormat:  TimeFormat,
+		DisableTimestamp: false,
+		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
+			return frame.Function, frame.File
+		},
+		PrettyPrint: isDebug,
+	}
+}
+
 func JsonEntry() *logrus.Entry {
 	return logrus.NewEntry(DefaultLogger())
 }
