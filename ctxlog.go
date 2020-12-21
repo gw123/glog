@@ -2,110 +2,126 @@ package glog
 
 import (
 	"context"
-	"github.com/sirupsen/logrus"
+	"encoding/json"
+	"errors"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 type ctxLoggerMarker struct{}
-type ctxRequestIDMarker struct{}
-type ctxUserIDMarker struct{}
-type ctxComIDMarker struct{}
 
 type ctxLogger struct {
-	logger *logrus.Entry
-	fields logrus.Fields
-	mutex  sync.Mutex
+	logger    *logrus.Entry
+	fields    map[string]interface{}
+	topFields map[string]interface{}
+	mutex     sync.RWMutex
 }
 
-type Record struct {
-	TraceID   int64  `json:"trace_id"`
-	CreatedAt int64  `json:"uint_64"`
-	Point     string `json:"point"`
-	Place     string `json:"place"`
-}
+var IsDebug bool = false
 
-const RequestID = "request_id"
-const UserID = "user_id"
-const ComID = "com_id"
+const KeyRequestID = "request_id"
+const KeyUserID = "user_id"
+
 const TimeFormat = "2006-01-02 15:04:05"
 
 var (
-	ctxLoggerKey    = &ctxLoggerMarker{}
-	ctxRequestIDKey = &ctxRequestIDMarker{}
-	ctxUserIDKey    = &ctxUserIDMarker{}
-	ctxComIDKey     = &ctxComIDMarker{}
+	ctxLoggerKey = &ctxLoggerMarker{}
 )
 
 //添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
-func AddFields(ctx context.Context, fields logrus.Fields) {
+func AddFields(ctx context.Context, fields map[string]interface{}) {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
 		return
 	}
+	l.mutex.Lock()
 	for k, v := range fields {
 		l.fields[k] = v
 	}
+	l.mutex.Unlock()
 }
 
-//添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
-func AddField(ctx context.Context, key, val string) {
+func AddTopField(ctx context.Context, key string, val interface{}) {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
 		return
 	}
+
+	l.mutex.Lock()
+	l.topFields[key] = val
 	l.fields[key] = val
+	l.mutex.Unlock()
+}
+
+//添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
+func AddField(ctx context.Context, key string, val interface{}) {
+	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
+	if !ok || l == nil {
+		return
+	}
+
+	l.mutex.Lock()
+	l.fields[key] = val
+	l.mutex.Unlock()
 }
 
 // 添加一个追踪规矩id 用来聚合同一次请求, 注意要用返回的contxt 替换传入的ctx
-func AddRequestID(ctx context.Context, requestID string) context.Context {
-	return context.WithValue(ctx, ctxRequestIDKey, requestID)
+func AddRequestID(ctx context.Context, requestID string) {
+	AddField(ctx, KeyRequestID, requestID)
 }
 
 //export requestID
 func ExtractRequestID(ctx context.Context) string {
-	l, ok := ctx.Value(ctxRequestIDKey).(string)
-	if !ok {
+	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
+	if !ok || l == nil {
+		if IsDebug {
+			panic(errors.New("not set ctxLogger"))
+		}
 		return ""
 	}
-	return l
+
+	l.mutex.RLock()
+	val, ok := l.fields[KeyRequestID].(string)
+	l.mutex.RUnlock()
+	if ok {
+		return val
+	}
+	return ""
 }
 
 //add userID to ctx
-func AddUserID(ctx context.Context, userID int64) context.Context {
-	return context.WithValue(ctx, ctxUserIDKey, userID)
+func AddUserID(ctx context.Context, userID int64) {
+	AddField(ctx, KeyUserID, userID)
 }
 
 //export userID
 func ExtractUserID(ctx context.Context) int64 {
-	l, ok := ctx.Value(ctxUserIDKey).(int64)
-	if !ok {
+	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
+	if !ok || l == nil {
+		if IsDebug {
+			panic(errors.New("not set ctxLogger"))
+		}
 		return 0
 	}
-	return l
-}
 
-//add comID to ctx
-func AddComID(ctx context.Context, comID int64) context.Context {
-	return context.WithValue(ctx, ctxComIDKey, comID)
-}
-
-//export comID
-func ExtractComID(ctx context.Context) int64 {
-	l, ok := ctx.Value(ctxComIDKey).(int64)
-	if !ok {
-		return 0
+	l.mutex.RLock()
+	val, ok := l.fields[KeyUserID].(int64)
+	l.mutex.RUnlock()
+	if ok {
+		return val
 	}
-	return l
+	return val
 }
 
 // 添加logrus.Entry到context, 这个操作添加的logrus.Entry在后面AddFields和Extract都会使用到
 func ToContext(ctx context.Context, entry *logrus.Entry) context.Context {
 	l := &ctxLogger{
-		logger: entry,
-		fields: logrus.Fields{},
-		mutex:  sync.Mutex{},
+		logger:    entry,
+		fields:    map[string]interface{}{},
+		topFields: map[string]interface{}{},
+		mutex:     sync.RWMutex{},
 	}
-
 	return context.WithValue(ctx, ctxLoggerKey, l)
 }
 
@@ -116,21 +132,20 @@ func ExtractEntry(ctx context.Context) *logrus.Entry {
 		return logrus.NewEntry(logrus.New())
 	}
 
-	l.mutex.Lock()
-	defer l.mutex.Unlock()
+	requestID := ExtractRequestID(ctx)
+	userID := ExtractUserID(ctx)
 
-	fields := logrus.Fields{}
-	for k, v := range l.fields {
-		fields[k] = v
+	l.mutex.Lock()
+	l.topFields[KeyRequestID] = requestID
+	l.topFields[KeyUserID] = userID
+
+	levelTwo, err := json.Marshal(l.fields)
+	if err == nil {
+		l.topFields["extra"] = string(levelTwo)
+	} else {
+		l.topFields["extra"] = err.Error()
 	}
 
-	requestID := ExtractRequestID(ctx)
-	fields[RequestID] = requestID
-
-	userID := ExtractUserID(ctx)
-	fields[UserID] = userID
-
-	comID := ExtractComID(ctx)
-	fields[ComID] = comID
-	return l.logger.WithFields(fields)
+	l.mutex.Unlock()
+	return l.logger.WithFields(l.topFields)
 }

@@ -4,4 +4,7 @@ go 1.12
 
 require github.com/sirupsen/logrus v1.4.2
 
-require github.com/pkg/profile v1.3.0
+require (
+	github.com/pkg/profile v1.3.0
+	go.uber.org/zap v1.16.0
+)

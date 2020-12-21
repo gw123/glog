@@ -1,9 +1,10 @@
 package glog
 
 import (
+	"runtime"
+
 	"github.com/gw123/glog/hook"
 	"github.com/sirupsen/logrus"
-	"runtime"
 )
 
 var defaultLogger *logrus.Logger
@@ -31,6 +32,8 @@ func JsonLogger() *logrus.Logger {
 		},
 		PrettyPrint: isDebug,
 	})
+	jsonLogger.AddHook(&hook.LogHook{Field: "caller"})
+
 	return jsonLogger
 }
 
@@ -46,7 +49,7 @@ func GetDefaultJsonLoggerFormatter() logrus.Formatter {
 }
 
 func JsonEntry() *logrus.Entry {
-	return logrus.NewEntry(DefaultLogger())
+	return logrus.NewEntry(JsonLogger())
 }
 
 // 为了方便创建一个默认的Logger

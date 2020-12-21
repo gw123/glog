@@ -30,7 +30,6 @@ func TestError(t *testing.T) {
 			Debug(tt.args.format)
 			Debugf(tt.args.format, tt.args.params[0])
 
-			SetDefaultJsonLogger()
 			Info(tt.args.format)
 			Infof(tt.args.format, tt.args.params[0])
 			Warn(tt.args.format)

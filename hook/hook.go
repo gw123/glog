@@ -2,10 +2,11 @@ package hook
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"runtime"
 	"strings"
 	"sync"
+
+	"github.com/sirupsen/logrus"
 )
 
 type LogHook struct {
