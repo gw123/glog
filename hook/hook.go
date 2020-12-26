@@ -30,7 +30,7 @@ func (hook *LogHook) Fire(entry *logrus.Entry) error {
 func NewLogHook(field string, levels []logrus.Level) logrus.Hook {
 	if len(levels) == 0 {
 		levels = []logrus.Level{logrus.ErrorLevel, logrus.WarnLevel}
-		//levels = logrus.AllLevels
+		//levels = logrus_driver.AllLevels
 	}
 	hook := LogHook{
 		Field:  field,
@@ -44,7 +44,7 @@ func findCaller(skip int) string {
 	line := 0
 	for i := 0; i < 10; i++ {
 		file, line = getCaller(skip + i)
-		if !strings.HasPrefix(file, "logrus") && !strings.HasPrefix(file, "glog") {
+		if !strings.HasPrefix(file, "logrus_driver") && !strings.HasPrefix(file, "glog") {
 			break
 		}
 	}

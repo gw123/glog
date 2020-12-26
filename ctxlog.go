@@ -2,28 +2,26 @@ package glog
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"sync"
+	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/gw123/glog/common"
+
+	"github.com/gw123/glog/driver/logrus_driver"
 )
 
 type ctxLoggerMarker struct{}
 
 type ctxLogger struct {
-	logger    *logrus.Entry
+	logger    common.Logger
 	fields    map[string]interface{}
 	topFields map[string]interface{}
 	mutex     sync.RWMutex
+	lastTime  time.Time
 }
 
 var IsDebug bool = false
-
-const KeyRequestID = "request_id"
-const KeyUserID = "user_id"
-
-const TimeFormat = "2006-01-02 15:04:05"
 
 var (
 	ctxLoggerKey = &ctxLoggerMarker{}
@@ -50,7 +48,6 @@ func AddTopField(ctx context.Context, key string, val interface{}) {
 
 	l.mutex.Lock()
 	l.topFields[key] = val
-	l.fields[key] = val
 	l.mutex.Unlock()
 }
 
@@ -67,12 +64,12 @@ func AddField(ctx context.Context, key string, val interface{}) {
 }
 
 // 添加一个追踪规矩id 用来聚合同一次请求, 注意要用返回的contxt 替换传入的ctx
-func AddRequestID(ctx context.Context, requestID string) {
-	AddField(ctx, KeyRequestID, requestID)
+func AddTraceID(ctx context.Context, traceID string) {
+	AddTopField(ctx, common.KeyTraceID, traceID)
 }
 
 //export requestID
-func ExtractRequestID(ctx context.Context) string {
+func ExtractTraceID(ctx context.Context) string {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
 		if IsDebug {
@@ -82,7 +79,7 @@ func ExtractRequestID(ctx context.Context) string {
 	}
 
 	l.mutex.RLock()
-	val, ok := l.fields[KeyRequestID].(string)
+	val, ok := l.topFields[common.KeyTraceID].(string)
 	l.mutex.RUnlock()
 	if ok {
 		return val
@@ -92,7 +89,7 @@ func ExtractRequestID(ctx context.Context) string {
 
 //add userID to ctx
 func AddUserID(ctx context.Context, userID int64) {
-	AddField(ctx, KeyUserID, userID)
+	AddTopField(ctx, common.KeyUserID, userID)
 }
 
 //export userID
@@ -106,7 +103,31 @@ func ExtractUserID(ctx context.Context) int64 {
 	}
 
 	l.mutex.RLock()
-	val, ok := l.fields[KeyUserID].(int64)
+	val, ok := l.topFields[common.KeyUserID].(int64)
+	l.mutex.RUnlock()
+	if ok {
+		return val
+	}
+	return val
+}
+
+//add userID to ctx
+func AddPathname(ctx context.Context, pathname string) {
+	AddTopField(ctx, common.KeyPathname, pathname)
+}
+
+//export userID
+func ExtractPathname(ctx context.Context) string {
+	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
+	if !ok || l == nil {
+		if IsDebug {
+			panic(errors.New("not set ctxLogger"))
+		}
+		return ""
+	}
+
+	l.mutex.RLock()
+	val, ok := l.topFields[common.KeyPathname].(string)
 	l.mutex.RUnlock()
 	if ok {
 		return val
@@ -115,37 +136,32 @@ func ExtractUserID(ctx context.Context) int64 {
 }
 
 // 添加logrus.Entry到context, 这个操作添加的logrus.Entry在后面AddFields和Extract都会使用到
-func ToContext(ctx context.Context, entry *logrus.Entry) context.Context {
+func ToContext(ctx context.Context, entry common.Logger) context.Context {
 	l := &ctxLogger{
 		logger:    entry,
 		fields:    map[string]interface{}{},
 		topFields: map[string]interface{}{},
 		mutex:     sync.RWMutex{},
+		lastTime:  time.Time{},
 	}
 	return context.WithValue(ctx, ctxLoggerKey, l)
 }
 
-//extract ctx_logrus logrus.Entry
-func ExtractEntry(ctx context.Context) *logrus.Entry {
+//extract ctx_logrus logrus_driver.Entry
+func ExtractEntry(ctx context.Context) common.Logger {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
-		return logrus.NewEntry(logrus.New())
+		return logrus_driver.DefaultLogger()
 	}
 
-	requestID := ExtractRequestID(ctx)
-	userID := ExtractUserID(ctx)
+	//l.mutex.Lock()
+	//levelTwo, err := json.Marshal(l.fields)
+	//if err == nil {
+	//	l.topFields["extra"] = string(levelTwo)
+	//} else {
+	//	l.topFields["extra"] = err.Error()
+	//}
+	//l.mutex.Unlock()
 
-	l.mutex.Lock()
-	l.topFields[KeyRequestID] = requestID
-	l.topFields[KeyUserID] = userID
-
-	levelTwo, err := json.Marshal(l.fields)
-	if err == nil {
-		l.topFields["extra"] = string(levelTwo)
-	} else {
-		l.topFields["extra"] = err.Error()
-	}
-
-	l.mutex.Unlock()
-	return l.logger.WithFields(l.topFields)
+	return l.logger.WithFields(l.topFields).WithFields(l.fields)
 }

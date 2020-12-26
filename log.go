@@ -1,79 +1,22 @@
 package glog
 
 import (
-	"runtime"
+	"sync"
 
-	"github.com/gw123/glog/hook"
-	"github.com/sirupsen/logrus"
+	"github.com/gw123/glog/common"
+	"github.com/gw123/glog/driver/logrus_driver"
 )
 
-var defaultLogger *logrus.Logger
-var isDebug = false
-
-func SetDebug(flag bool) {
-	isDebug = flag
-}
+var defaultLogger common.Logger
+var once = sync.Once{}
 
 // 为了方便创建一个默认的Logger
-func DefaultLogger() *logrus.Logger {
-	if defaultLogger == nil {
-		defaultLogger = TextLogger()
-	}
+func DefaultLogger() common.Logger {
+	once.Do(func() {
+		defaultLogger = logrus_driver.DefaultLogger()
+	})
+
 	return defaultLogger
-}
-
-func JsonLogger() *logrus.Logger {
-	jsonLogger := logrus.New()
-	jsonLogger.SetFormatter(&logrus.JSONFormatter{
-		TimestampFormat:  TimeFormat,
-		DisableTimestamp: false,
-		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-			return frame.Function, frame.File
-		},
-		PrettyPrint: isDebug,
-	})
-	jsonLogger.AddHook(&hook.LogHook{Field: "caller"})
-
-	return jsonLogger
-}
-
-func GetDefaultJsonLoggerFormatter() logrus.Formatter {
-	return &logrus.JSONFormatter{
-		TimestampFormat:  TimeFormat,
-		DisableTimestamp: false,
-		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-			return frame.Function, frame.File
-		},
-		PrettyPrint: isDebug,
-	}
-}
-
-func JsonEntry() *logrus.Entry {
-	return logrus.NewEntry(JsonLogger())
-}
-
-// 为了方便创建一个默认的Logger
-func TextLogger() *logrus.Logger {
-	textLogger := logrus.New()
-	textLogger.SetFormatter(&logrus.TextFormatter{
-		TimestampFormat:  TimeFormat,
-		DisableTimestamp: false,
-		CallerPrettyfier: func(frame *runtime.Frame) (function string, file string) {
-			return frame.Function, frame.File
-		},
-	})
-	return textLogger
-}
-
-func TextEntry() *logrus.Entry {
-	return logrus.NewEntry(TextLogger())
-}
-
-func SetDefaultLoggerFormatter(formatter logrus.Formatter) {
-	newLogger := logrus.New()
-	newLogger.SetFormatter(formatter)
-	newLogger.AddHook(&hook.LogHook{Field: "caller"})
-	defaultLogger = newLogger
 }
 
 func Error(format string) {
@@ -81,7 +24,7 @@ func Error(format string) {
 }
 
 func Errorf(format string, other ...interface{}) {
-	defaultLogger.Errorf(format, other...)
+	defaultLogger.Errorf(format, other)
 }
 
 func Warn(format string) {
@@ -89,7 +32,7 @@ func Warn(format string) {
 }
 
 func Warnf(format string, other ...interface{}) {
-	defaultLogger.Warnf(format, other...)
+	defaultLogger.Warnf(format, other)
 }
 
 func Info(format string) {
@@ -97,7 +40,7 @@ func Info(format string) {
 }
 
 func Infof(format string, other ...interface{}) {
-	defaultLogger.Infof(format, other...)
+	defaultLogger.Infof(format, other)
 }
 
 func Debug(format string) {
@@ -105,5 +48,5 @@ func Debug(format string) {
 }
 
 func Debugf(format string, other ...interface{}) {
-	defaultLogger.Debugf(format, other...)
+	defaultLogger.Debugf(format, other)
 }
