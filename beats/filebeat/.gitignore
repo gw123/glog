@@ -1,0 +1,5 @@
+filebeat.es.pord.yml
+filebeat.pord.yml
+filebeat.format2.yml
+registry
+filebeat.lock

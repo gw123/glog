@@ -1,2 +1,10 @@
 [2020-12-28 21:52:08.485] [info] [] cluster/service_manager.go 190 [] - ServiceManager[businesspoint].updateServiceIdConfig watchChildren [serviceId = businesspoint_10_39001],[data = [version last_modify_time status]] evt.Type :EventNodeChildrenChanged
 [2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg
+[2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg
+[2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg
+[2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg
+[2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg
+[2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg
+[2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg
+[2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg
+[2020-12-28 21:52:13.759] [error] [] integral/integral.go 369 [] - ConsumeClaim no msg

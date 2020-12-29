@@ -1,5 +1,7 @@
 // 解析message格式消息到json格式
-// [2020-12-28 22:10:58] [info] [glog/ctxlog_test.go:67] [/home/index] [10000001] TestContent abc 0 {"app":"xytschol","ip":"10.0.0.1"}
+// [2020-12-28 19:28:42.325] [info] [] cluster/service_manager.go 190 [] - ServiceManager[point].
+// 2020-12-29T18:15:23.847+0800
+
 // input  2020-12-28 19:28:42.325
 // output 2020-12-29T18:15:23.847+0800
 function formatTime(time){
@@ -18,14 +20,13 @@ function formatTime(time){
 
 function process(event) {
     var message = event.Get("message")
-    var rule = /\[(.*?)\] \[(.*?)\] \[(.*?)\] \[(.*?)\] \[(.*?)\] (.*)/g
+    var rule = /\[(.*?)\] \[(.*?)\] \[(.*?)\] (.+) (\d{1,4}) \[(.*?)\] - (.*)/g
     var res = rule.exec(message)
+
     if(res){
-        event.Put("timestamp", formatTime(res[1]))
         event.Put("level", res[2])
-        event.Put("line", res[3])
-        event.Put("pathname", res[4])
-        event.Put("trace_id", res[5])
-        event.Put("message", res[6])
+        event.Put("line", res[4] + " "+res[5])
+        event.Put("message", res[7])
+        event.Put("@timestamp", formatTime(res[1]))
     }
 }
