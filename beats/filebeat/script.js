@@ -22,6 +22,7 @@ function process(event) {
     var res = rule.exec(message)
     if(res){
         event.Put("timestamp", formatTime(res[1]))
+        event.Put("time",res[1])
         event.Put("level", res[2])
         event.Put("line", res[3])
         event.Put("pathname", res[4])
