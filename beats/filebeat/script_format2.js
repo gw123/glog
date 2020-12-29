@@ -27,6 +27,6 @@ function process(event) {
         event.Put("level", res[2])
         event.Put("line", res[4] + " "+res[5])
         event.Put("message", res[7])
-        event.Put("@timestamp", formatTime(res[1]))
+        event.Put("timestamp", formatTime(res[1]))
     }
 }
