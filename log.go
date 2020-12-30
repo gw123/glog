@@ -20,33 +20,41 @@ func DefaultLogger() common.Logger {
 }
 
 func Error(format string) {
-	defaultLogger.Error(format)
+	DefaultLogger().Error(format)
 }
 
 func Errorf(format string, other ...interface{}) {
-	defaultLogger.Errorf(format, other)
+	DefaultLogger().Errorf(format, other)
 }
 
 func Warn(format string) {
-	defaultLogger.Warn(format)
+	DefaultLogger().Warn(format)
 }
 
 func Warnf(format string, other ...interface{}) {
-	defaultLogger.Warnf(format, other)
+	DefaultLogger().Warnf(format, other)
 }
 
 func Info(format string) {
-	defaultLogger.Info(format)
+	DefaultLogger().Info(format)
 }
 
 func Infof(format string, other ...interface{}) {
-	defaultLogger.Infof(format, other)
+	DefaultLogger().Infof(format, other)
 }
 
 func Debug(format string) {
-	defaultLogger.Debug(format)
+	DefaultLogger().Debug(format)
 }
 
 func Debugf(format string, other ...interface{}) {
-	defaultLogger.Debugf(format, other)
+	DefaultLogger().Debugf(format, other)
+}
+
+func WithField(format string, other ...interface{}) common.Logger {
+	return DefaultLogger().WithField(format, other)
+}
+
+func WithErr(err error) common.Logger {
+	return DefaultLogger().WithError(err)
 }

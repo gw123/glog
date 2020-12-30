@@ -31,4 +31,4 @@ processors:
       fields: ["@timestamp","@metadata","metadata","timestamp","fields","agent","ecs","input","log","host"]
   - script:
         lang: javascript
-        file: ${path.config}/script.js
+        file: ${path.config}/script_format1.js

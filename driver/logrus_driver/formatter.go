@@ -10,7 +10,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const DateTimeFormat = "2006-01-02 15:04:05"
+const DateTimeFormat = "2006-01-02 15:04:05.000"
 
 type GTextFormat struct {
 }

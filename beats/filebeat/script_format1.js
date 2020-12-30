@@ -1,9 +1,8 @@
 // 解析message格式消息到json格式
-// [2020-12-28 19:28:42.325] [info] [] cluster/service_manager.go 190 [] - ServiceManager[point].
-// 2020-12-29T18:15:23.847+0800
-
+// [2020-12-28 22:10:58.112] [info] [glog/ctxlog_test.go:67] [/home/index] [10000001] TestContent abc 0 {"app":"xytschol","ip":"10.0.0.1"}
 // input  2020-12-28 19:28:42.325
 // output 2020-12-29T18:15:23.847+0800
+//        2020-12-30T18:23:42.328+0800
 function formatTime(time){
     var times = time.replace(/-/g,':').replace('.', ':' ).replace(' ',':').split(':')
     var resultTime = ""
@@ -24,16 +23,20 @@ function formatTime(time){
 
 function process(event) {
     var message = event.Get("message")
-    var rule = /\[(.*?)\] \[(.*?)\] \[(.*?)\] (.+) (\d{1,4}) \[(.*?)\] - (.*)/g
+    var rule = /\[(.*?)\] \[(.*?)\] \[(.*?)\] \[(.*?)\] \[(.*?)\] (.*)/g
     var res = rule.exec(message)
     if(res){
+        event.Put("time",formatTime(res[1]))
         event.Put("level", res[2])
-        event.Put("line", res[4] + " "+res[5])
-        event.Put("message", res[7])
-        event.Put("time", formatTime(res[1]))
+        event.Put("line", res[3])
+        event.Put("pathname", res[4])
+        event.Put("trace_id", res[5])
+        event.Put("message", res[6])
     }else {
+        event.Put("time",formatTime(res[1]))
         event.Put("level", 'unknow')
         event.Put("line", 'unknow')
-        event.Put("time", formatTime(res[1]))
+        event.Put("pathname", 'unknow')
+        event.Put("trace_id", 'unknow')
     }
 }

@@ -63,7 +63,7 @@ func TestALl(t *testing.T) {
 
 	//6. 在action 或者service 等地方记录日志记录日志
 	entry = ExtractEntry(ctx).WithField("ip", "10.0.0.1")
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 20; i++ {
 		entry.Infof("TestContent abc %d", i)
 	}
 	//输出结果

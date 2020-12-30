@@ -1,5 +1,5 @@
-filebeat.es.pord.yml
-filebeat.pord.yml
+filebeat.es.prod.yml
+filebeat.prod.yml
 filebeat.format2.yml
 registry
 filebeat.lock
