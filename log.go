@@ -1,21 +1,13 @@
 package glog
 
 import (
-	"sync"
-
 	"github.com/gw123/glog/common"
 	"github.com/gw123/glog/driver/logrus_driver"
 )
 
-var defaultLogger common.Logger
-var once = sync.Once{}
-
 // 为了方便创建一个默认的Logger
 func DefaultLogger() common.Logger {
-	once.Do(func() {
-		defaultLogger = logrus_driver.DefaultLogger()
-	})
-
+	defaultLogger := logrus_driver.DefaultLogger()
 	return defaultLogger
 }
 
