@@ -63,8 +63,9 @@ func TestALl(t *testing.T) {
 
 	//6. 在action 或者service 等地方记录日志记录日志
 	entry = ExtractEntry(ctx).WithField("ip", "10.0.0.1")
+	entry = ExtractEntry(ctx).WithField("ip2", "10.0.0.1")
 	for i := 0; i < 20; i++ {
-		entry.Infof("TestContent abc %d", i)
+		entry.WithField("key", i).Infof("TestContent abc %d", i)
 	}
 	//输出结果
 	//{"RequestID":"10000001","app_name":"web","ip":"10.0.0.1","level":"info","msg":"TestContent","time":"2020-03-17 20:34:14"}

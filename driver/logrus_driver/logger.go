@@ -46,13 +46,17 @@ func DefaultJsonLogger() *Logger {
 }
 
 func (l *Logger) WithField(key string, value interface{}) common.Logger {
-	l.Entry = l.Entry.WithField(key, value)
-	return l
+	tmpLoger := &Logger{
+		Entry: l.Entry.WithField(key, value),
+	}
+	return tmpLoger
 }
 
 func (l *Logger) WithFields(fields map[string]interface{}) common.Logger {
-	l.Entry = l.Entry.WithFields(fields)
-	return l
+	tmpLoger := &Logger{
+		Entry: l.Entry.WithFields(fields),
+	}
+	return tmpLoger
 }
 
 func (l *Logger) WithError(err error) common.Logger {
