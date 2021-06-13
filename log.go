@@ -16,7 +16,7 @@ func Error(format string) {
 }
 
 func Errorf(format string, other ...interface{}) {
-	DefaultLogger().Errorf(format, other)
+	DefaultLogger().Errorf(format, other...)
 }
 
 func Warn(format string) {
@@ -24,7 +24,7 @@ func Warn(format string) {
 }
 
 func Warnf(format string, other ...interface{}) {
-	DefaultLogger().Warnf(format, other)
+	DefaultLogger().Warnf(format, other...)
 }
 
 func Info(format string) {
@@ -32,7 +32,7 @@ func Info(format string) {
 }
 
 func Infof(format string, other ...interface{}) {
-	DefaultLogger().Infof(format, other)
+	DefaultLogger().Infof(format, other...)
 }
 
 func Debug(format string) {
@@ -40,7 +40,7 @@ func Debug(format string) {
 }
 
 func Debugf(format string, other ...interface{}) {
-	DefaultLogger().Debugf(format, other)
+	DefaultLogger().Debugf(format, other...)
 }
 
 func WithField(format string, other ...interface{}) common.Logger {
