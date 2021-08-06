@@ -8,6 +8,8 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const ErrorKey = "error"
+
 type Logger struct {
 	*logrus.Entry
 }
@@ -58,7 +60,7 @@ func (l *Logger) WithFields(fields map[string]interface{}) common.Logger {
 
 func (l *Logger) WithError(err error) common.Logger {
 	tmpLoger := &Logger{
-		Entry: l.Entry.WithError(err),
+		Entry: l.Entry.WithField(ErrorKey, err.Error()),
 	}
 	return tmpLoger
 }

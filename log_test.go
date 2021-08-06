@@ -1,6 +1,9 @@
 package glog
 
-import "testing"
+import (
+	"errors"
+	"testing"
+)
 
 func TestError(t *testing.T) {
 	type args struct {
@@ -40,4 +43,9 @@ func TestError(t *testing.T) {
 			Debugf(tt.args.format, tt.args.params[0])
 		})
 	}
+}
+
+func TestWithError(t *testing.T) {
+	var err = errors.New("xxxxx")
+	DefaultLogger().WithError(err).Error("xxxxxxxx")
 }
