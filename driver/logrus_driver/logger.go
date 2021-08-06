@@ -27,10 +27,7 @@ func DefaultLogger() *Logger {
 		logger.SetReportCaller(true)
 		logger.SetFormatter(GTextFormat{})
 	})
-
-	return &Logger{
-		Entry: logrus.NewEntry(logger),
-	}
+	return NewLogger(logger)
 }
 
 func DefaultJsonLogger() *Logger {
@@ -60,6 +57,8 @@ func (l *Logger) WithFields(fields map[string]interface{}) common.Logger {
 }
 
 func (l *Logger) WithError(err error) common.Logger {
-	l.Entry = l.Entry.WithError(err)
-	return l
+	tmpLoger := &Logger{
+		Entry: l.Entry.WithError(err),
+	}
+	return tmpLoger
 }
