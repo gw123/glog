@@ -1,6 +1,8 @@
 package zap_driver
 
 import (
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -106,6 +108,19 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 		},
 
 		ConsoleSeparator: " ",
+	}
+
+	allLogPath := append(options.OutputPaths, options.ErrorOutputPaths...)
+	for _, path := range allLogPath {
+		if path == common.PathStderr || path == common.PathStdout {
+			continue
+		}
+
+		dir := filepath.Dir(path)
+		_, err := os.Stat(dir)
+		if os.IsNotExist(err) {
+			os.MkdirAll(dir, 0760)
+		}
 	}
 
 	cfg := zap.Config{
