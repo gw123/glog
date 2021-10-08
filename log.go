@@ -3,12 +3,37 @@ package glog
 import (
 	"github.com/gw123/glog/common"
 	"github.com/gw123/glog/driver/logrus_driver"
+	"github.com/gw123/glog/driver/zap_driver"
 )
+
+const (
+	DriverLogrus = "logrus"
+	DriverZap    = "zap"
+)
+
+var defaultDriver = DriverLogrus
+
+func init() {
+
+}
 
 // 为了方便创建一个默认的Logger
 func DefaultLogger() common.Logger {
-	defaultLogger := logrus_driver.DefaultLogger()
-	return defaultLogger
+	if defaultDriver == DriverLogrus {
+		return logrus_driver.DefaultLogger()
+	} else {
+		return zap_driver.DefaultLogger()
+	}
+}
+
+func SetDefaultLoggerDriver(driver string) {
+	if driver == DriverLogrus || driver == DriverZap {
+		defaultDriver = driver
+	}
+}
+
+func SetDefaultZapLoggerConfig(options common.Options, withFuncList ...common.WithFunc) error {
+	return zap_driver.SetDefaultLoggerConfig(options, withFuncList...)
 }
 
 func Error(format string) {

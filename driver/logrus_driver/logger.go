@@ -20,16 +20,19 @@ func NewLogger(logger *logrus.Logger) *Logger {
 	}
 }
 
-var logger *logrus.Logger
+var logger *Logger
 var loggerOnce sync.Once
 
+func init() {
+	_logger := logrus.New()
+	_logger.SetReportCaller(true)
+	_logger.SetLevel(logrus.DebugLevel)
+	_logger.SetFormatter(GTextFormat{})
+	logger = NewLogger(_logger)
+}
+
 func DefaultLogger() *Logger {
-	loggerOnce.Do(func() {
-		logger = logrus.New()
-		logger.SetReportCaller(true)
-		logger.SetFormatter(GTextFormat{})
-	})
-	return NewLogger(logger)
+	return logger
 }
 
 func DefaultJsonLogger() *Logger {

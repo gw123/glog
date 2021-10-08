@@ -20,5 +20,16 @@ func TestTextFormat_Format(t1 *testing.T) {
 
 	entry := logger.WithField(common.KeyPathname, "/index/index").WithField(common.KeyTraceID, "x109123229883")
 	entry.Infof("abc")
+}
 
+func BenchmarkTestInfo(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		DefaultLogger().Info("hello ")
+	}
+}
+
+func BenchmarkTestInfof(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		DefaultLogger().Infof("hello %d", i)
+	}
 }

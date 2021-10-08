@@ -153,15 +153,5 @@ func ExtractEntry(ctx context.Context) common.Logger {
 	if !ok || l == nil {
 		return logrus_driver.DefaultLogger()
 	}
-
-	//l.mutex.Lock()
-	//levelTwo, err := json.Marshal(l.fields)
-	//if err == nil {
-	//	l.topFields["extra"] = string(levelTwo)
-	//} else {
-	//	l.topFields["extra"] = err.Error()
-	//}
-	//l.mutex.Unlock()
-
 	return l.logger.WithFields(l.topFields).WithFields(l.fields)
 }

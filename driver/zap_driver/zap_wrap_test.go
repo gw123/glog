@@ -9,14 +9,10 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-const (
-	DateTimeFormat = "2006-01-02 15:04:05.000"
-)
-
 func TestNewLog(t *testing.T) {
 	url := "http://xxxx.html"
 	logger, _ := zap.NewProduction()
-	//defer logger.Sync() // flushes buffer, if any
+	//defer defaultLogger.Sync() // flushes buffer, if any
 	sugar := logger.Sugar()
 	sugar.Infow("failed to fetch URL",
 		// Structured context as loosely typed key-value pairs.
@@ -30,17 +26,18 @@ func TestNewLog(t *testing.T) {
 }
 
 func TestTextLog(t *testing.T) {
+
 	encodeCfg := zapcore.EncoderConfig{
 		TimeKey:       "ts",
 		LevelKey:      "level",
-		NameKey:       "logger",
+		NameKey:       "defaultLogger",
 		CallerKey:     "caller",
 		FunctionKey:   zapcore.OmitKey,
 		MessageKey:    "msg",
 		StacktraceKey: "stacktrace",
 		LineEnding:    zapcore.DefaultLineEnding,
 		EncodeLevel: func(lv zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString("[" + levelToString(lv) + "]")
+			enc.AppendString("[" + lv.String() + "]")
 		},
 		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 			enc.AppendString("[" + t.Format(DateTimeFormat) + "]")
@@ -56,7 +53,7 @@ func TestTextLog(t *testing.T) {
 	}
 
 	encodeCfg.EncodeLevel = func(lv zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-		enc.AppendString("[" + levelToString(lv) + "]")
+		enc.AppendString("[" + lv.String() + "]")
 	}
 
 	encodeCfg.EncodeCaller = func(call zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
