@@ -32,7 +32,9 @@ func (l Logger) WithFields(fields map[string]interface{}) common.Logger {
 }
 
 func (l Logger) WithError(err error) common.Logger {
-	panic("implement me")
+	return &Logger{
+		l.SugaredLogger.With(zap.Error(err)),
+	}
 }
 
 func (l Logger) Warningf(format string, args ...interface{}) {
@@ -113,10 +115,11 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 			Initial:    100,
 			Thereafter: 100,
 		},
-		Encoding:         options.Encoding,
-		EncoderConfig:    encodeCfg,
-		OutputPaths:      options.OutputPaths,
-		ErrorOutputPaths: options.ErrorOutputPaths,
+		DisableStacktrace: true,
+		Encoding:          options.Encoding,
+		EncoderConfig:     encodeCfg,
+		OutputPaths:       options.OutputPaths,
+		ErrorOutputPaths:  options.ErrorOutputPaths,
 	}
 
 	logger, err := cfg.Build(zap.AddCaller(), zap.AddCallerSkip(0))

@@ -1,6 +1,7 @@
 package zap_driver
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/gw123/glog/common"
@@ -15,6 +16,18 @@ func TestNewLogger(t *testing.T) {
 
 	for i := 0; i < 100000; i++ {
 		logger.Infof("hello")
+	}
+}
+
+func TestWithError(t *testing.T) {
+	logger, err := NewLogger(common.Options{})
+
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	for i := 0; i < 100; i++ {
+		logger.WithError(errors.New("test new error")).Error("show log")
 	}
 }
 
