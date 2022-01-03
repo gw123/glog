@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/gw123/glog/common"
-
-	"github.com/gw123/glog/driver/logrus_driver"
 )
 
 type ctxLoggerMarker struct{}
@@ -151,7 +149,7 @@ func ToContext(ctx context.Context, entry common.Logger) context.Context {
 func ExtractEntry(ctx context.Context) common.Logger {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
-		return logrus_driver.DefaultLogger()
+		return DefaultLogger()
 	}
 	return l.logger.WithFields(l.topFields).WithFields(l.fields)
 }

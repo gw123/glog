@@ -2,50 +2,8 @@ package glog
 
 import (
 	"context"
-	"errors"
 	"testing"
-
-	"github.com/sirupsen/logrus"
 )
-
-func TestDefaultLogger(t *testing.T) {
-	log := DefaultLogger()
-	log.Info("hello world")
-	log.WithError(errors.New("test err")).Info("hello world")
-}
-
-func TestContext(t *testing.T) {
-	entry := DefaultLogger()
-	ctx := context.Background()
-	ctx = ToContext(ctx, entry)
-	AddFields(ctx, logrus.Fields{
-		"app_name": "web",
-	})
-	ExtractEntry(ctx).WithFields(logrus.Fields{"field1": "hello world"}).Info("TestContent")
-}
-
-func TestExtractEntryWithID(t *testing.T) {
-	ctx := context.Background()
-
-	AddTraceID(ctx, "10000001")
-	entry := DefaultLogger()
-	ctx = ToContext(ctx, entry)
-	AddFields(ctx, logrus.Fields{
-		"app_name": "web",
-	})
-	ExtractEntry(ctx).WithFields(logrus.Fields{"field1": "hello world"}).Info("TestContent")
-	ExtractEntry(ctx).WithFields(logrus.Fields{"field1": "cpu"}).Info("very nice")
-}
-
-func TestExtractEntryWithID2(t *testing.T) {
-	ctx := context.Background()
-	entry := DefaultLogger()
-	ctx = ToContext(ctx, entry)
-	AddTraceID(ctx, "10000001")
-	AddField(ctx, "app_name", "web")
-	ExtractEntry(ctx).WithFields(logrus.Fields{"field1": "hello world"}).Info("TestContent")
-	ExtractEntry(ctx).WithFields(logrus.Fields{"field1": "cpu"}).Info("very nice")
-}
 
 func TestALl(t *testing.T) {
 	//1. 一般是在应用的入口创建一个根context

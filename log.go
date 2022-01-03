@@ -2,7 +2,6 @@ package glog
 
 import (
 	"github.com/gw123/glog/common"
-	"github.com/gw123/glog/driver/logrus_driver"
 	"github.com/gw123/glog/driver/zap_driver"
 )
 
@@ -19,11 +18,7 @@ func init() {
 
 // 为了方便创建一个默认的Logger
 func DefaultLogger() common.Logger {
-	if defaultDriver == DriverLogrus {
-		return logrus_driver.DefaultLogger()
-	} else {
-		return zap_driver.DefaultLogger()
-	}
+	return zap_driver.DefaultLogger()
 }
 
 func SetDefaultLoggerDriver(driver string) {

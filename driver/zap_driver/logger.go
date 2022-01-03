@@ -99,7 +99,7 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 			enc.AppendString("[" + lv.String() + "]")
 		},
 		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString("[v1] [" + t.Format(DateTimeFormat) + "]")
+			enc.AppendString("[" + t.Format(DateTimeFormat) + "]")
 		},
 		EncodeDuration: zapcore.SecondsDurationEncoder,
 		EncodeCaller: func(call zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
