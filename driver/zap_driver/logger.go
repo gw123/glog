@@ -48,6 +48,7 @@ func (l Logger) Warning(args ...interface{}) {
 }
 
 var defaultLogger *Logger
+var innerLogger *Logger
 var loggerOnce sync.Once
 
 func SetDefaultLoggerConfig(options common.Options, withFuncList ...common.WithFunc) error {
@@ -67,10 +68,19 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
+	innerLogger, err = NewLogger(option, common.WithCallerSkip(1), common.WithConsoleEncoding(), common.WithLevel(common.DebugLevel), common.WithStdoutOutputPath(), common.WithStderrErrorOutputPath())
+	if err != nil {
+		panic(err)
+	}
 }
 
 func DefaultLogger() *Logger {
 	return defaultLogger
+}
+
+func GetInnerLogger() *Logger {
+	return innerLogger
 }
 
 func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, error) {
@@ -137,7 +147,7 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 		ErrorOutputPaths:  options.ErrorOutputPaths,
 	}
 
-	logger, err := cfg.Build(zap.AddCaller(), zap.AddCallerSkip(0))
+	logger, err := cfg.Build(zap.AddCaller(), zap.AddCallerSkip(options.CallerSkip))
 	if err != nil {
 		return nil, err
 	}

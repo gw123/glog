@@ -23,6 +23,7 @@ type Options struct {
 	ErrorOutputPaths []string
 	Encoding         string
 	Level            Level
+	CallerSkip       int
 }
 
 type WithFunc func(o *Options)
@@ -75,5 +76,11 @@ func WithJsonEncoding() WithFunc {
 func WithLevel(level Level) WithFunc {
 	return func(o *Options) {
 		o.Level = level
+	}
+}
+
+func WithCallerSkip(skip int) WithFunc {
+	return func(o *Options) {
+		o.CallerSkip = skip
 	}
 }

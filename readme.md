@@ -1,24 +1,30 @@
-# 基础使用基于 logrus 做了简单的封装,默认记录时间和代码位置
+# 基础使用基于zap做的封装,默认记录时间和代码位置
 ```go
-    Info(tt.args.format)
-    Infof(tt.args.format, tt.args.params[0])
-	Warn(tt.args.format)
-	Warnf(tt.args.format, tt.args.params[0])
-	Error(tt.args.format)
-	Errorf(tt.args.format, tt.args.params[0])
-	Debug(tt.args.format)
-	Debugf(tt.args.format, tt.args.params[0])
+glog.Infof("show log level %s", "other a")
+glog.Errorf("show log error %s", "other b")
+glog.Warnf("show log warn %s", "other c")
+glog.Debugf("show log debug %s", "other d")
 
-    //切换默认的日志格式为json
-    SetDefaultJsonLogger()
-	Info(tt.args.format)
-	Infof(tt.args.format, tt.args.params[0])
-	Warn(tt.args.format)
-	Warnf(tt.args.format, tt.args.params[0])
-	Error(tt.args.format)
-	Errorf(tt.args.format, tt.args.params[0])
-	Debug(tt.args.format)
-	Debugf(tt.args.format, tt.args.params[0])
+glog.Log().Info("show log")
+glog.Log().Debugf("show log debug %s", "other")
+glog.Log().Infof("show log info %s", "other")
+glog.Log().Warnf("show log warn %s", "other")
+glog.Log().Debugf("show log debug %s", "other")
+
+glog.Log().WithField("key", "val").Infof("show log info") 
+```
+### 输出
+```
+[2022-04-01 14:12:15.891] [info] [] demo/demo.go:8 []  show log level other a
+[2022-04-01 14:12:15.892] [error] [] demo/demo.go:9 []  show log error other b
+[2022-04-01 14:12:15.892] [warn] [] demo/demo.go:10 []  show log warn other c
+[2022-04-01 14:12:15.892] [debug] [] demo/demo.go:11 []  show log debug other d
+[2022-04-01 14:12:15.892] [info] [] demo/demo.go:13 []  show log
+[2022-04-01 14:12:15.892] [debug] [] demo/demo.go:14 []  show log debug other
+[2022-04-01 14:12:15.892] [info] [] demo/demo.go:15 []  show log info other
+[2022-04-01 14:12:15.892] [warn] [] demo/demo.go:16 []  show log warn other
+[2022-04-01 14:12:15.892] [debug] [] demo/demo.go:17 []  show log debug other
+[2022-04-01 14:12:15.892] [info] [] demo/demo.go:19 []  show log info {"key": "val"}
 ```
 
 # ctxlog.go 是利用context做日志的上下文记录
@@ -43,34 +49,3 @@ ExtractEntry(ctx).WithField("ip", "10.0.0.1").Info("TestContent")
 //输出结果
 //{"RequestID":"10000001","app_name":"web","ip":"10.0.0.1","level":"info","msg":"TestContent","time":"2020-03-17 20:34:14"}
 ```
-
-# 记录日志
-# profile.go使用方式
-profile.go 是用来定时记录一个profile文件
-默认的时间间隔是一小时 
-默认记录的是内存使用情况 (mem)
-pprof文件的默认位置在/tmp/pprof/exeName/day_hour_minute/mem.pprof
-修改配置方式
-
-tip:go tool pprof 和 pprof 工具使用请查看:
-http://www.xytschool.com/chapter/454.html
-
-### 修改profile类型
-    SetProfile(ProfileMode(mode))
-    mode支持的profile类型
-    PModeCpu = "cpu"    
-	PModeMem = "mem"   
-	PModeMutex = "mutex" 
-	PModeThread = "thread"
-	PModeTrace = "trace"
-	
-## 修改pprof文件生成路径
-	SetProfile(ProfilePath("./"))
-## 修改单个pprof采集时长
-	SetProfile(ProfilePeriod(time.minute*10))
-## 多个配置一起修改
-    SetProfile(ProfileMode("cpu"), ProfilePath("./"), ProfilePeriod(time.minute*10))
-#### 开始记录
-    StartProfile()
-##### 停止记录
-    StopProfile()

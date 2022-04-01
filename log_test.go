@@ -53,12 +53,10 @@ func TestWithError(t *testing.T) {
 }
 
 func TestSetDefaultLoggerDriver(t *testing.T) {
-	SetDefaultLoggerDriver(DriverZap)
 	DefaultLogger().WithField("abc", "hello").Info("show log")
 }
 
 func TestSetDefaultZapLoggerConfig(t *testing.T) {
-	SetDefaultLoggerDriver(DriverZap)
 	SetDefaultZapLoggerConfig(common.Options{
 		OutputPaths:      []string{common.PathStdout, "test.log"},
 		ErrorOutputPaths: []string{common.PathStderr},
@@ -70,7 +68,6 @@ func TestSetDefaultZapLoggerConfig(t *testing.T) {
 }
 
 func TestSetDefaultZapLoggerConfig2(t *testing.T) {
-	SetDefaultLoggerDriver(DriverZap)
 	err := SetDefaultZapLoggerConfig(common.Options{
 		OutputPaths:      []string{common.PathStdout, "/Users/mac/chj/data/log/bcs-gateway-easegress-service/bcs-gateway-easegress-service.log"},
 		ErrorOutputPaths: []string{common.PathStderr},
@@ -85,14 +82,12 @@ func TestSetDefaultZapLoggerConfig2(t *testing.T) {
 }
 
 func BenchmarkTestInfof(b *testing.B) {
-	SetDefaultLoggerDriver(DriverZap)
 	for i := 0; i < b.N; i++ {
 		DefaultLogger().Infof("hello %d", i)
 	}
 }
 
 func BenchmarkTestWithPath(b *testing.B) {
-	SetDefaultLoggerDriver(DriverZap)
 	SetDefaultZapLoggerConfig(common.Options{
 		OutputPaths:      []string{common.PathStdout, "test.log"},
 		ErrorOutputPaths: []string{common.PathStderr},

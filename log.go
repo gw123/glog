@@ -6,25 +6,17 @@ import (
 )
 
 const (
-	DriverLogrus = "logrus"
-	DriverZap    = "zap"
+	DriverZap = "zap"
 )
-
-var defaultDriver = DriverLogrus
-
-func init() {
-
-}
 
 // 为了方便创建一个默认的Logger
 func DefaultLogger() common.Logger {
 	return zap_driver.DefaultLogger()
 }
 
-func SetDefaultLoggerDriver(driver string) {
-	if driver == DriverLogrus || driver == DriverZap {
-		defaultDriver = driver
-	}
+// 为了方便创建一个默认的Logger
+func Log() common.Logger {
+	return zap_driver.DefaultLogger()
 }
 
 func SetDefaultZapLoggerConfig(options common.Options, withFuncList ...common.WithFunc) error {
@@ -32,41 +24,41 @@ func SetDefaultZapLoggerConfig(options common.Options, withFuncList ...common.Wi
 }
 
 func Error(format string) {
-	DefaultLogger().Error(format)
+	zap_driver.GetInnerLogger().Error(format)
 }
 
 func Errorf(format string, other ...interface{}) {
-	DefaultLogger().Errorf(format, other...)
+	zap_driver.GetInnerLogger().Errorf(format, other...)
 }
 
 func Warn(format string) {
-	DefaultLogger().Warn(format)
+	zap_driver.GetInnerLogger().Warn(format)
 }
 
 func Warnf(format string, other ...interface{}) {
-	DefaultLogger().Warnf(format, other...)
+	zap_driver.GetInnerLogger().Warnf(format, other...)
 }
 
 func Info(format string) {
-	DefaultLogger().Info(format)
+	zap_driver.GetInnerLogger().Info(format)
 }
 
 func Infof(format string, other ...interface{}) {
-	DefaultLogger().Infof(format, other...)
+	zap_driver.GetInnerLogger().Infof(format, other...)
 }
 
 func Debug(format string) {
-	DefaultLogger().Debug(format)
+	zap_driver.GetInnerLogger().Debug(format)
 }
 
 func Debugf(format string, other ...interface{}) {
-	DefaultLogger().Debugf(format, other...)
+	zap_driver.GetInnerLogger().Debugf(format, other...)
 }
 
 func WithField(format string, other ...interface{}) common.Logger {
-	return DefaultLogger().WithField(format, other)
+	return zap_driver.GetInnerLogger().WithField(format, other)
 }
 
 func WithErr(err error) common.Logger {
-	return DefaultLogger().WithError(err)
+	return zap_driver.GetInnerLogger().WithError(err)
 }
