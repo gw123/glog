@@ -3,10 +3,12 @@ package glog
 import (
 	"context"
 	"errors"
+	"github.com/gw123/glog/driver/zap_driver"
 	"sync"
 	"time"
 
 	"github.com/gw123/glog/common"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type ctxLoggerMarker struct{}
@@ -85,6 +87,22 @@ func ExtractTraceID(ctx context.Context) string {
 	return ""
 }
 
+//export Otel traceID
+func WithOTEL(ctx context.Context) common.Logger {
+	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
+	var logger common.Logger
+	if !ok || l == nil {
+		logger = DefaultLogger()
+	} else {
+		logger = l.logger
+	}
+
+	if span := trace.SpanContextFromContext(ctx); span.TraceID().IsValid() {
+		return logger.WithField("trace_id", span.TraceID().String())
+	}
+	return logger
+}
+
 //add userID to ctx
 func AddUserID(ctx context.Context, userID int64) {
 	AddTopField(ctx, common.KeyUserID, userID)
@@ -114,7 +132,7 @@ func AddPathname(ctx context.Context, pathname string) {
 	AddTopField(ctx, common.KeyPathname, pathname)
 }
 
-//export userID
+//export pathname
 func ExtractPathname(ctx context.Context) string {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -149,7 +167,7 @@ func ToContext(ctx context.Context, entry common.Logger) context.Context {
 func ExtractEntry(ctx context.Context) common.Logger {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
-		return DefaultLogger()
+		return zap_driver.GetInnerLogger()
 	}
 	return l.logger.WithFields(l.topFields).WithFields(l.fields)
 }

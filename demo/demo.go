@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/gw123/glog"
 )
 
@@ -17,4 +18,6 @@ func main() {
 	glog.Log().Debugf("show log debug %s", "other")
 
 	glog.Log().WithField("key", "val").Infof("show log info")
+
+	glog.WithOTEL(context.Background()).Info("with otel id")
 }
