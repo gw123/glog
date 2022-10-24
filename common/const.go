@@ -30,7 +30,7 @@ type WithFunc func(o *Options)
 
 func WithStdoutOutputPath() WithFunc {
 	return func(o *Options) {
-		if o != nil {
+		if o == nil {
 			return
 		}
 		o.OutputPaths = append(o.OutputPaths, PathStdout)
@@ -39,7 +39,7 @@ func WithStdoutOutputPath() WithFunc {
 
 func WithStderrErrorOutputPath() WithFunc {
 	return func(o *Options) {
-		if o != nil {
+		if o == nil {
 			return
 		}
 		o.ErrorOutputPaths = append(o.ErrorOutputPaths, PathStderr)
@@ -48,7 +48,7 @@ func WithStderrErrorOutputPath() WithFunc {
 
 func WithOutputPath(path string) WithFunc {
 	return func(o *Options) {
-		if o != nil {
+		if o == nil {
 			return
 		}
 		o.OutputPaths = append(o.OutputPaths, path)
@@ -57,7 +57,7 @@ func WithOutputPath(path string) WithFunc {
 
 func WithConsoleEncoding() WithFunc {
 	return func(o *Options) {
-		if o != nil {
+		if o == nil {
 			return
 		}
 		o.Encoding = EncodeConsole
@@ -66,7 +66,7 @@ func WithConsoleEncoding() WithFunc {
 
 func WithJsonEncoding() WithFunc {
 	return func(o *Options) {
-		if o != nil {
+		if o == nil {
 			return
 		}
 		o.Encoding = EncodeJson
@@ -75,12 +75,18 @@ func WithJsonEncoding() WithFunc {
 
 func WithLevel(level Level) WithFunc {
 	return func(o *Options) {
+		if o == nil {
+			return
+		}
 		o.Level = level
 	}
 }
 
 func WithCallerSkip(skip int) WithFunc {
 	return func(o *Options) {
+		if o == nil {
+			return
+		}
 		o.CallerSkip = skip
 	}
 }

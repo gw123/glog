@@ -69,7 +69,7 @@ func TestSetDefaultZapLoggerConfig(t *testing.T) {
 
 func TestSetDefaultZapLoggerConfig2(t *testing.T) {
 	err := SetDefaultZapLoggerConfig(common.Options{
-		OutputPaths:      []string{common.PathStdout, "/Users/mac/chj/data/log/bcs-gateway-easegress-service/bcs-gateway-easegress-service.log"},
+		OutputPaths:      []string{common.PathStdout, "./test.log"},
 		ErrorOutputPaths: []string{common.PathStderr},
 		Encoding:         common.EncodeConsole,
 		Level:            common.DebugLevel,
