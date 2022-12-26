@@ -34,8 +34,13 @@ func (l Logger) WithFields(fields map[string]interface{}) common.Logger {
 }
 
 func (l Logger) WithError(err error) common.Logger {
+	if err == nil {
+		return l
+	}
+
 	return &Logger{
-		l.SugaredLogger.With(zap.Error(err)),
+		//l.SugaredLogger.With(zap.Error(err)),
+		l.SugaredLogger.With(zap.String("error", err.Error())),
 	}
 }
 
@@ -64,12 +69,12 @@ func SetDefaultLoggerConfig(options common.Options, withFuncList ...common.WithF
 func init() {
 	var err error
 	option := common.Options{}
-	defaultLogger, err = NewLogger(option, common.WithConsoleEncoding(), common.WithLevel(common.DebugLevel), common.WithStdoutOutputPath(), common.WithStderrErrorOutputPath())
+	defaultLogger, err = NewLogger(option, common.WithConsoleEncoding(), common.WithLevel(common.InfoLevel), common.WithStdoutOutputPath(), common.WithStderrErrorOutputPath())
 	if err != nil {
 		panic(err)
 	}
 
-	innerLogger, err = NewLogger(option, common.WithCallerSkip(1), common.WithConsoleEncoding(), common.WithLevel(common.DebugLevel), common.WithStdoutOutputPath(), common.WithStderrErrorOutputPath())
+	innerLogger, err = NewLogger(option, common.WithCallerSkip(1), common.WithConsoleEncoding(), common.WithLevel(common.InfoLevel), common.WithStdoutOutputPath(), common.WithStderrErrorOutputPath())
 	if err != nil {
 		panic(err)
 	}
