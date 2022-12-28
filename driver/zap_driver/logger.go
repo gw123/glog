@@ -3,6 +3,7 @@ package zap_driver
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -50,6 +51,12 @@ func (l Logger) Warningf(format string, args ...interface{}) {
 
 func (l Logger) Warning(args ...interface{}) {
 	l.SugaredLogger.Warn(args...)
+}
+
+func (l Logger) Named(name string) *Logger {
+	return &Logger{
+		SugaredLogger: l.SugaredLogger.Named(name),
+	}
 }
 
 var defaultLogger *Logger
@@ -116,12 +123,21 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 		EncodeTime: func(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 			enc.AppendString("[" + t.Format(DateTimeFormat) + "]")
 		},
-		EncodeDuration: zapcore.SecondsDurationEncoder,
+		//EncodeDuration: func(duration time.Duration, encoder zapcore.PrimitiveArrayEncoder) {
+		//	encoder.AppendString(duration.String())
+		//},
 		EncodeCaller: func(call zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 			trPath := call.TrimmedPath()
-			enc.AppendString("[] " + trPath + " [] ")
+			enc.AppendString(trPath + " [] ")
 		},
-
+		EncodeName: func(name string, enc zapcore.PrimitiveArrayEncoder) {
+			names := strings.Split(name, ".")
+			if len(names) == 1 {
+				enc.AppendString("[]")
+				return
+			}
+			enc.AppendString("[" + strings.Join(names[1:], ".") + "]")
+		},
 		ConsoleSeparator: " ",
 	}
 
@@ -157,6 +173,6 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 		return nil, err
 	}
 
-	su := logger.Sugar()
+	su := logger.Sugar().Named("-")
 	return &Logger{SugaredLogger: su}, nil
 }

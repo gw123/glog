@@ -19,6 +19,15 @@ func TestNewLogger(t *testing.T) {
 	}
 }
 
+func TestNamed(t *testing.T) {
+	logger, err := NewLogger(common.Options{})
+	if err != nil {
+		t.Error(err.Error())
+	}
+	logger.Infof("abc")
+	logger.Named("glog").Infof("hello")
+}
+
 func TestWithError(t *testing.T) {
 	logger, err := NewLogger(common.Options{})
 
