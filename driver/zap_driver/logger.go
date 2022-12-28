@@ -53,7 +53,7 @@ func (l Logger) Warning(args ...interface{}) {
 	l.SugaredLogger.Warn(args...)
 }
 
-func (l Logger) Named(name string) *Logger {
+func (l Logger) Named(name string) common.Logger {
 	return &Logger{
 		SugaredLogger: l.SugaredLogger.Named(name),
 	}

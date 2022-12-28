@@ -20,4 +20,5 @@ type Logger interface {
 	Error(args ...interface{})
 	Fatal(args ...interface{})
 	Panic(args ...interface{})
+	Named(name string) Logger
 }

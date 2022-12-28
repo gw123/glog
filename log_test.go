@@ -65,6 +65,7 @@ func TestSetDefaultZapLoggerConfig(t *testing.T) {
 	})
 	DefaultLogger().WithField("abc", "hello").Debug("show log")
 	DefaultLogger().WithField("abc", "hello").Info("show log")
+	DefaultLogger().Named("glog").WithField("abc", "hello").Info("show log")
 }
 
 func TestSetDefaultZapLoggerConfig2(t *testing.T) {
