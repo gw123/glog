@@ -62,3 +62,7 @@ func WithField(format string, other ...interface{}) common.Logger {
 func WithErr(err error) common.Logger {
 	return zap_driver.GetInnerLogger().WithError(err)
 }
+
+func WithError(err error) common.Logger {
+	return zap_driver.GetInnerLogger().WithError(err)
+}

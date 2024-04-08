@@ -27,7 +27,7 @@ var (
 	ctxLoggerKey = &ctxLoggerMarker{}
 )
 
-//添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
+// AddFields 添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
 func AddFields(ctx context.Context, fields map[string]interface{}) {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -51,7 +51,7 @@ func AddTopField(ctx context.Context, key string, val interface{}) {
 	l.mutex.Unlock()
 }
 
-//添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
+// 添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
 func AddField(ctx context.Context, key string, val interface{}) {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -63,12 +63,12 @@ func AddField(ctx context.Context, key string, val interface{}) {
 	l.mutex.Unlock()
 }
 
-// 添加一个追踪规矩id 用来聚合同一次请求, 注意要用返回的contxt 替换传入的ctx
+// AddTraceID 添加一个追踪规矩id 用来聚合同一次请求, 注意要用返回的contxt 替换传入的ctx
 func AddTraceID(ctx context.Context, traceID string) {
 	AddTopField(ctx, common.KeyTraceID, traceID)
 }
 
-//export requestID
+// ExtractTraceID requestID
 func ExtractTraceID(ctx context.Context) string {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -87,7 +87,7 @@ func ExtractTraceID(ctx context.Context) string {
 	return ""
 }
 
-//export Otel traceID
+// WithOTEL Otel traceID
 func WithOTEL(ctx context.Context) common.Logger {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	var logger common.Logger
@@ -103,12 +103,12 @@ func WithOTEL(ctx context.Context) common.Logger {
 	return logger
 }
 
-//add userID to ctx
+// AddUserID add userID to ctx
 func AddUserID(ctx context.Context, userID int64) {
 	AddTopField(ctx, common.KeyUserID, userID)
 }
 
-//export userID
+// ExtractUserID userID
 func ExtractUserID(ctx context.Context) int64 {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -127,12 +127,12 @@ func ExtractUserID(ctx context.Context) int64 {
 	return val
 }
 
-//add userID to ctx
+// AddPathname add userID to ctx
 func AddPathname(ctx context.Context, pathname string) {
 	AddTopField(ctx, common.KeyPathname, pathname)
 }
 
-//export pathname
+// ExtractPathname pathname
 func ExtractPathname(ctx context.Context) string {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -151,7 +151,7 @@ func ExtractPathname(ctx context.Context) string {
 	return val
 }
 
-// 添加logrus.Entry到context, 这个操作添加的logrus.Entry在后面AddFields和Extract都会使用到
+// ToContext 添加logrus.Entry到context, 这个操作添加的logrus.Entry在后面AddFields和Extract都会使用到
 func ToContext(ctx context.Context, entry common.Logger) context.Context {
 	l := &ctxLogger{
 		logger:    entry,
@@ -163,11 +163,15 @@ func ToContext(ctx context.Context, entry common.Logger) context.Context {
 	return context.WithValue(ctx, ctxLoggerKey, l)
 }
 
-//extract ctx_logrus logrus_driver.Entry
+// ExtractEntry extract ctx_logrus logrus_driver.Entry
 func ExtractEntry(ctx context.Context) common.Logger {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
 		return zap_driver.GetInnerLogger()
 	}
-	return l.logger.WithFields(l.topFields).WithFields(l.fields)
+	logger := l.logger.WithFields(l.topFields).WithFields(l.fields)
+	if span := trace.SpanContextFromContext(ctx); span.TraceID().IsValid() {
+		return logger.WithField("trace_id", span.TraceID().String())
+	}
+	return logger
 }
