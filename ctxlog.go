@@ -3,7 +3,6 @@ package glog
 import (
 	"context"
 	"errors"
-	"github.com/gw123/glog/driver/zap_driver"
 	"sync"
 	"time"
 
@@ -165,11 +164,13 @@ func ToContext(ctx context.Context, entry common.Logger) context.Context {
 
 // ExtractEntry extract ctx_logrus logrus_driver.Entry
 func ExtractEntry(ctx context.Context) common.Logger {
+	var logger common.Logger
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
-	if !ok || l == nil {
-		return zap_driver.GetInnerLogger()
+	if ok && l != nil {
+		logger = l.logger.WithFields(l.topFields).WithFields(l.fields)
+	} else {
+		logger = DefaultLogger()
 	}
-	logger := l.logger.WithFields(l.topFields).WithFields(l.fields)
 	if span := trace.SpanContextFromContext(ctx); span.TraceID().IsValid() {
 		return logger.WithField("trace_id", span.TraceID().String())
 	}
