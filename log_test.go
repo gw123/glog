@@ -7,7 +7,7 @@ import (
 	"github.com/gw123/glog/common"
 )
 
-func TestError(t *testing.T) {
+func TestErrorFunc(t *testing.T) {
 	type args struct {
 		format string
 		params []string
@@ -47,17 +47,17 @@ func TestError(t *testing.T) {
 	}
 }
 
-func TestWithError(t *testing.T) {
+func TestWithErrorFunc(t *testing.T) {
 	var err = errors.New("xxxxx")
 	DefaultLogger().WithError(err).Error("xxxxxxxx")
 }
 
-func TestSetDefaultLoggerDriver(t *testing.T) {
+func TestDefaultLogger(t *testing.T) {
 	DefaultLogger().WithField("abc", "hello").Info("show log")
 }
 
-func TestSetDefaultZapLoggerConfig(t *testing.T) {
-	SetDefaultZapLoggerConfig(common.Options{
+func TestSetDefaultLoggerConfig(t *testing.T) {
+	SetDefaultLoggerConfig(common.Options{
 		OutputPaths:      []string{common.PathStdout, "test.log"},
 		ErrorOutputPaths: []string{common.PathStderr},
 		Encoding:         common.EncodeConsole,
@@ -68,8 +68,8 @@ func TestSetDefaultZapLoggerConfig(t *testing.T) {
 	DefaultLogger().Named("glog").WithField("abc", "hello").Info("show log")
 }
 
-func TestSetDefaultZapLoggerConfig2(t *testing.T) {
-	err := SetDefaultZapLoggerConfig(common.Options{
+func TestSetDefaultLoggerConfig2(t *testing.T) {
+	err := SetDefaultLoggerConfig(common.Options{
 		OutputPaths:      []string{common.PathStdout, "./test.log"},
 		ErrorOutputPaths: []string{common.PathStderr},
 		Encoding:         common.EncodeConsole,
@@ -89,7 +89,7 @@ func BenchmarkTestInfof(b *testing.B) {
 }
 
 func BenchmarkTestWithPath(b *testing.B) {
-	SetDefaultZapLoggerConfig(common.Options{
+	SetDefaultLoggerConfig(common.Options{
 		OutputPaths:      []string{common.PathStdout, "test.log"},
 		ErrorOutputPaths: []string{common.PathStderr},
 		Encoding:         common.EncodeConsole,

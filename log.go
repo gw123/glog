@@ -2,67 +2,61 @@ package glog
 
 import (
 	"github.com/gw123/glog/common"
-	"github.com/gw123/glog/driver/zap_driver"
+	"github.com/gw123/glog/zap"
 )
 
-const (
-	DriverZap = "zap"
-)
-
-// 为了方便创建一个默认的Logger
 func DefaultLogger() common.Logger {
-	return zap_driver.DefaultLogger()
+	return zap.DefaultLogger()
 }
 
-// 为了方便创建一个默认的Logger
 func Log() common.Logger {
-	return zap_driver.DefaultLogger()
+	return zap.DefaultLogger()
 }
 
-func SetDefaultZapLoggerConfig(options common.Options, withFuncList ...common.WithFunc) error {
-	return zap_driver.SetDefaultLoggerConfig(options, withFuncList...)
+func SetDefaultLoggerConfig(options common.Options, withFuncList ...common.WithFunc) error {
+	return zap.SetDefaultLoggerConfig(options, withFuncList...)
 }
 
 func Error(format string) {
-	zap_driver.GetInnerLogger().Error(format)
+	zap.GetInnerLogger().Error(format)
 }
 
 func Errorf(format string, other ...interface{}) {
-	zap_driver.GetInnerLogger().Errorf(format, other...)
+	zap.GetInnerLogger().Errorf(format, other...)
 }
 
 func Warn(format string) {
-	zap_driver.GetInnerLogger().Warn(format)
+	zap.GetInnerLogger().Warn(format)
 }
 
 func Warnf(format string, other ...interface{}) {
-	zap_driver.GetInnerLogger().Warnf(format, other...)
+	zap.GetInnerLogger().Warnf(format, other...)
 }
 
 func Info(format string) {
-	zap_driver.GetInnerLogger().Info(format)
+	zap.GetInnerLogger().Info(format)
 }
 
 func Infof(format string, other ...interface{}) {
-	zap_driver.GetInnerLogger().Infof(format, other...)
+	zap.GetInnerLogger().Infof(format, other...)
 }
 
 func Debug(format string) {
-	zap_driver.GetInnerLogger().Debug(format)
+	zap.GetInnerLogger().Debug(format)
 }
 
 func Debugf(format string, other ...interface{}) {
-	zap_driver.GetInnerLogger().Debugf(format, other...)
+	zap.GetInnerLogger().Debugf(format, other...)
 }
 
 func WithField(format string, other ...interface{}) common.Logger {
-	return zap_driver.GetInnerLogger().WithField(format, other)
+	return zap.GetInnerLogger().WithField(format, other)
 }
 
 func WithErr(err error) common.Logger {
-	return zap_driver.GetInnerLogger().WithError(err)
+	return zap.GetInnerLogger().WithError(err)
 }
 
 func WithError(err error) common.Logger {
-	return zap_driver.GetInnerLogger().WithError(err)
+	return zap.GetInnerLogger().WithError(err)
 }

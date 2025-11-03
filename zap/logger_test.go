@@ -1,4 +1,4 @@
-package zap_driver
+package zap
 
 import (
 	"errors"

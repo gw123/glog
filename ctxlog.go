@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"sync"
-	"time"
 
 	"github.com/gw123/glog/common"
 	"go.opentelemetry.io/otel/trace"
@@ -17,7 +16,6 @@ type ctxLogger struct {
 	fields    map[string]interface{}
 	topFields map[string]interface{}
 	mutex     sync.RWMutex
-	lastTime  time.Time
 }
 
 var IsDebug bool = false
@@ -26,7 +24,7 @@ var (
 	ctxLoggerKey = &ctxLoggerMarker{}
 )
 
-// AddFields 添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
+// AddFields adds multiple log fields to the context logger
 func AddFields(ctx context.Context, fields map[string]interface{}) {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -50,7 +48,7 @@ func AddTopField(ctx context.Context, key string, val interface{}) {
 	l.mutex.Unlock()
 }
 
-// 添加日志字段到日志中间件(ctx_logrus)，添加的字段会在后面调用 info，debug，error 时候输出
+// AddField adds a single log field to the context logger
 func AddField(ctx context.Context, key string, val interface{}) {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -62,12 +60,12 @@ func AddField(ctx context.Context, key string, val interface{}) {
 	l.mutex.Unlock()
 }
 
-// AddTraceID 添加一个追踪规矩id 用来聚合同一次请求, 注意要用返回的contxt 替换传入的ctx
+// AddTraceID adds a trace ID for aggregating logs from the same request
 func AddTraceID(ctx context.Context, traceID string) {
 	AddTopField(ctx, common.KeyTraceID, traceID)
 }
 
-// ExtractTraceID requestID
+// ExtractTraceID extracts the trace ID from the context
 func ExtractTraceID(ctx context.Context) string {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if !ok || l == nil {
@@ -86,7 +84,7 @@ func ExtractTraceID(ctx context.Context) string {
 	return ""
 }
 
-// WithOTEL Otel traceID
+// WithOTEL extracts OpenTelemetry trace ID from context and adds it to the logger
 func WithOTEL(ctx context.Context) common.Logger {
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	var logger common.Logger
@@ -123,7 +121,7 @@ func ExtractUserID(ctx context.Context) int64 {
 	if ok {
 		return val
 	}
-	return val
+	return 0
 }
 
 // AddPathname add userID to ctx
@@ -147,22 +145,21 @@ func ExtractPathname(ctx context.Context) string {
 	if ok {
 		return val
 	}
-	return val
+	return ""
 }
 
-// ToContext 添加logrus.Entry到context, 这个操作添加的logrus.Entry在后面AddFields和Extract都会使用到
+// ToContext adds a logger to the context for use in subsequent log operations
 func ToContext(ctx context.Context, entry common.Logger) context.Context {
 	l := &ctxLogger{
 		logger:    entry,
 		fields:    map[string]interface{}{},
 		topFields: map[string]interface{}{},
 		mutex:     sync.RWMutex{},
-		lastTime:  time.Time{},
 	}
 	return context.WithValue(ctx, ctxLoggerKey, l)
 }
 
-// ExtractEntry extract ctx_logrus logrus_driver.Entry
+// ExtractEntry extracts the logger from context with all accumulated fields
 func ExtractEntry(ctx context.Context) common.Logger {
 	var logger common.Logger
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)

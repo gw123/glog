@@ -1,6 +1,7 @@
-package zap_driver
+package zap
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -29,8 +30,12 @@ func (l Logger) WithField(key string, value interface{}) common.Logger {
 }
 
 func (l Logger) WithFields(fields map[string]interface{}) common.Logger {
+	args := make([]interface{}, 0, len(fields)*2)
+	for k, v := range fields {
+		args = append(args, k, v)
+	}
 	return &Logger{
-		SugaredLogger: l.SugaredLogger.With(zap.Any("fields", fields)),
+		SugaredLogger: l.SugaredLogger.With(args...),
 	}
 }
 
@@ -40,7 +45,6 @@ func (l Logger) WithError(err error) common.Logger {
 	}
 
 	return &Logger{
-		//l.SugaredLogger.With(zap.Error(err)),
 		l.SugaredLogger.With(zap.String("error", err.Error())),
 	}
 }
@@ -59,22 +63,33 @@ func (l Logger) Named(name string) common.Logger {
 	}
 }
 
-var defaultLogger *Logger
-var innerLogger *Logger
-var loggerOnce sync.Once
+var (
+	defaultLogger *Logger
+	innerLogger   *Logger
+	loggerMutex   sync.RWMutex
+)
 
 func SetDefaultLoggerConfig(options common.Options, withFuncList ...common.WithFunc) error {
-	var err error
 	newLogger, err := NewLogger(options, withFuncList...)
 	if err != nil {
 		return err
 	}
+	loggerMutex.Lock()
 	defaultLogger = newLogger
-	return err
+	loggerMutex.Unlock()
+	return nil
 }
 
 func init() {
-	var err error
+	// Register custom console encoder globally
+	err := zap.RegisterEncoder("custom-console", func(cfg zapcore.EncoderConfig) (zapcore.Encoder, error) {
+		return newCustomConsoleEncoder(cfg), nil
+	})
+	if err != nil {
+		fmt.Printf("WARNING: Failed to register custom console encoder: %v\n", err)
+		panic(err)
+	}
+
 	option := common.Options{}
 	defaultLogger, err = NewLogger(option, common.WithConsoleEncoding(), common.WithLevel(common.InfoLevel), common.WithStdoutOutputPath(), common.WithStderrErrorOutputPath())
 	if err != nil {
@@ -88,6 +103,8 @@ func init() {
 }
 
 func DefaultLogger() *Logger {
+	loggerMutex.RLock()
+	defer loggerMutex.RUnlock()
 	return defaultLogger
 }
 
@@ -105,7 +122,9 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 	}
 
 	if options.Encoding == "" {
-		options.Encoding = common.EncodeConsole
+		options.Encoding = "custom-console"
+	} else if options.Encoding == common.EncodeConsole {
+		options.Encoding = "custom-console"
 	}
 
 	encodeCfg := zapcore.EncoderConfig{
@@ -128,7 +147,7 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 		//},
 		EncodeCaller: func(call zapcore.EntryCaller, enc zapcore.PrimitiveArrayEncoder) {
 			trPath := call.TrimmedPath()
-			enc.AppendString(trPath + " [] ")
+			enc.AppendString(trPath)
 		},
 		EncodeName: func(name string, enc zapcore.PrimitiveArrayEncoder) {
 			names := strings.Split(name, ".")
@@ -148,9 +167,10 @@ func NewLogger(options common.Options, withFuncs ...common.WithFunc) (*Logger, e
 		}
 
 		dir := filepath.Dir(path)
-		_, err := os.Stat(dir)
-		if os.IsNotExist(err) {
-			os.MkdirAll(dir, 0760)
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			if err := os.MkdirAll(dir, 0760); err != nil {
+				return nil, err
+			}
 		}
 	}
 
