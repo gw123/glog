@@ -74,8 +74,20 @@ func SetDefaultLoggerConfig(options common.Options, withFuncList ...common.WithF
 	if err != nil {
 		return err
 	}
+
+	innerOptions := options
+	innerWithFuncs := make([]common.WithFunc, len(withFuncList)+1)
+	copy(innerWithFuncs, withFuncList)
+	innerWithFuncs[len(withFuncList)] = common.WithCallerSkip(1)
+
+	newInnerLogger, err := NewLogger(innerOptions, innerWithFuncs...)
+	if err != nil {
+		return err
+	}
+
 	loggerMutex.Lock()
 	defaultLogger = newLogger
+	innerLogger = newInnerLogger
 	loggerMutex.Unlock()
 	return nil
 }
@@ -109,6 +121,8 @@ func DefaultLogger() *Logger {
 }
 
 func GetInnerLogger() *Logger {
+	loggerMutex.RLock()
+	defer loggerMutex.RUnlock()
 	return innerLogger
 }
 

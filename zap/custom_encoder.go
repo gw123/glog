@@ -110,7 +110,6 @@ func (enc *customConsoleEncoder) EncodeEntry(entry zapcore.Entry, fields []zapco
 
 	// Trace ID - fixed position
 	buf.AppendString(traceID)
-	buf.AppendString(" ")
 
 	// Message
 	buf.AppendString(" ")
@@ -133,12 +132,13 @@ func (enc *customConsoleEncoder) EncodeEntry(entry zapcore.Entry, fields []zapco
 				buf.AppendByte('"')
 				buf.AppendString(field.String)
 				buf.AppendByte('"')
-			case zapcore.Int64Type, zapcore.Int32Type, zapcore.Int16Type, zapcore.Int8Type:
-				fmt.Fprintf(buf, "[%d]", field.Integer)
-			case zapcore.Uint64Type, zapcore.Uint32Type, zapcore.Uint16Type, zapcore.Uint8Type:
+			case zapcore.Int64Type, zapcore.Int32Type, zapcore.Int16Type, zapcore.Int8Type,
+				zapcore.Uint64Type, zapcore.Uint32Type, zapcore.Uint16Type, zapcore.Uint8Type:
 				fmt.Fprintf(buf, "%d", field.Integer)
-			case zapcore.Float64Type, zapcore.Float32Type:
-				fmt.Fprintf(buf, "%v", field.Integer)
+			case zapcore.Float64Type:
+				fmt.Fprintf(buf, "%f", float64(field.Integer))
+			case zapcore.Float32Type:
+				fmt.Fprintf(buf, "%f", float32(field.Integer))
 			case zapcore.BoolType:
 				if field.Integer == 1 {
 					buf.AppendString("true")
@@ -146,7 +146,6 @@ func (enc *customConsoleEncoder) EncodeEntry(entry zapcore.Entry, fields []zapco
 					buf.AppendString("false")
 				}
 			default:
-				// Try to marshal as JSON for complex types
 				if data, err := json.Marshal(field.Interface); err == nil {
 					buf.Write(data)
 				} else {

@@ -49,8 +49,8 @@ func Debugf(format string, other ...interface{}) {
 	zap.GetInnerLogger().Debugf(format, other...)
 }
 
-func WithField(format string, other ...interface{}) common.Logger {
-	return zap.GetInnerLogger().WithField(format, other)
+func WithField(key string, value interface{}) common.Logger {
+	return zap.GetInnerLogger().WithField(key, value)
 }
 
 func WithErr(err error) common.Logger {

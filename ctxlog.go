@@ -31,9 +31,14 @@ func AddFields(ctx context.Context, fields map[string]interface{}) {
 		return
 	}
 	l.mutex.Lock()
-	for k, v := range fields {
-		l.fields[k] = v
+	newFields := make(map[string]interface{}, len(l.fields)+len(fields))
+	for k, v := range l.fields {
+		newFields[k] = v
 	}
+	for k, v := range fields {
+		newFields[k] = v
+	}
+	l.fields = newFields
 	l.mutex.Unlock()
 }
 
@@ -44,7 +49,12 @@ func AddTopField(ctx context.Context, key string, val interface{}) {
 	}
 
 	l.mutex.Lock()
-	l.topFields[key] = val
+	newTopFields := make(map[string]interface{}, len(l.topFields)+1)
+	for k, v := range l.topFields {
+		newTopFields[k] = v
+	}
+	newTopFields[key] = val
+	l.topFields = newTopFields
 	l.mutex.Unlock()
 }
 
@@ -56,7 +66,12 @@ func AddField(ctx context.Context, key string, val interface{}) {
 	}
 
 	l.mutex.Lock()
-	l.fields[key] = val
+	newFields := make(map[string]interface{}, len(l.fields)+1)
+	for k, v := range l.fields {
+		newFields[k] = v
+	}
+	newFields[key] = val
+	l.fields = newFields
 	l.mutex.Unlock()
 }
 
@@ -164,7 +179,11 @@ func ExtractEntry(ctx context.Context) common.Logger {
 	var logger common.Logger
 	l, ok := ctx.Value(ctxLoggerKey).(*ctxLogger)
 	if ok && l != nil {
-		logger = l.logger.WithFields(l.topFields).WithFields(l.fields)
+		l.mutex.RLock()
+		topFields := l.topFields
+		fields := l.fields
+		l.mutex.RUnlock()
+		logger = l.logger.WithFields(topFields).WithFields(fields)
 	} else {
 		logger = DefaultLogger()
 	}
