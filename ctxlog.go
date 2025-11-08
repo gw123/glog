@@ -96,6 +96,10 @@ func ExtractTraceID(ctx context.Context) string {
 	if ok {
 		return val
 	}
+
+	if span := trace.SpanContextFromContext(ctx); span.TraceID().IsValid() {
+		return span.TraceID().String()
+	}
 	return ""
 }
 
@@ -187,8 +191,8 @@ func ExtractEntry(ctx context.Context) common.Logger {
 	} else {
 		logger = DefaultLogger()
 	}
-	if span := trace.SpanContextFromContext(ctx); span.TraceID().IsValid() {
-		return logger.WithField("trace_id", span.TraceID().String())
+	if tID := ExtractTraceID(ctx); tID != "" {
+		return logger.WithField("trace_id", tID)
 	}
 	return logger
 }
